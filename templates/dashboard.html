@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Include jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Dashboard</a>
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/config">Config</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/logout">Logout</a>
+        </li>
+    </ul>
+</nav>
+
+<!-- Add the main content of your dashboard here -->
+<div class="container mt-4">
+    <!-- Refresh button -->
+    <button id="refreshButton" class="btn btn-primary" onclick="refreshTrades()">Refresh Trades</button>
+    <button id="clearTradesButton" class="btn btn-danger" onclick="clearTrades()">Clear Trades</button>
+
+    <!-- Table to display trades -->
+    <table class="table table-bordered mt-4">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Market At</th>
+            <th>Candle Close At</th>
+            <th>Is Buying</th>
+            <th>Type</th>
+        </tr>
+        </thead>
+        <tbody id="tradeTableBody">
+        <!-- Trade data will be inserted here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Include Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+        // Function to refresh trades
+        function refreshTrades() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/api/trades", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    var tableBody = document.getElementById("tradeTableBody");
+                    tableBody.innerHTML = ""; // Clear the existing data
+
+                    data.forEach(function (trade) {
+                        var row = tableBody.insertRow(tableBody.rows.length);
+                        row.insertCell(0).textContent = trade.id;
+                        row.insertCell(1).textContent = trade.marketAt;
+                        row.insertCell(2).textContent = trade.candleCloseAt;
+                        row.insertCell(3).textContent = trade.isBuying;
+                        row.insertCell(4).textContent = trade.type;
+                    });
+                }
+            };
+            xhr.send();
+        }
+
+         function clearTrades() {
+        $.ajax({
+            type: "DELETE",
+            url: "/api/clear-trades",
+            success: function (response) {
+                // Trades are cleared, so refresh the table
+                refreshTrades();
+            },
+            error: function (error) {
+                console.log("Error clearing trades:", error);
+            }
+        });
+    }
+
+         $(document).ready(function () {
+            refreshTrades();
+        });
+
+
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Configuration Page</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center">Configuration</h1>
+        <div id="successMessage" class="alert alert-success" role="alert" style="display: none;"></div>
+        <form id="configForm">
+            <div class="form-group">
+                <label for="levels">Levels</label>
+                <input type="number" class="form-control" id="levels" name="levels">
+            </div>
+            <div class="form-group">
+                <label for="selectedCandle">Selected Candle</label>
+                <select class="form-control" id="selectedCandle" name="selectedCandle">
+                    <option value="1min">1min</option>
+                    <option value="5min">5min</option>
+                    <option value="15min">15min</option>
+                    <option value="30min">30min</option>
+                    <option value="1hour">1hour</option>
+                    <option value="1day">1day</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="monitoringStatus" name="monitoringStatus">
+                    <label class="form-check-label" for="monitoringStatus">Monitoring Status</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="realTrades" name="realTrades">
+                    <label class="form-check-label" for="realTrades">Real Trades</label>
+                </div>
+            </div>
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Include Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Function to display the success message
+        function showSuccessMessage(message) {
+            const successMessage = document.getElementById("successMessage");
+            successMessage.textContent = message;
+            successMessage.style.display = "block";
+        }
+
+        // Function to update the configuration via API
+        function updateConfiguration(data) {
+            fetch('/api/config', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(updatedData => {
+                console.log("Configuration updated successfully:", updatedData.message);
+                showSuccessMessage(updatedData.message); // Show the success message
+            })
+            .catch(error => console.error("Error updating configuration:", error));
+        }
+
+        // Fetch the initial configuration data
+        fetch('/api/config')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("levels").value = data.levels;
+                document.getElementById("selectedCandle").value = data.selectedCandle;
+                document.getElementById("monitoringStatus").checked = data.monitoringStatus;
+                document.getElementById("realTrades").checked = data.realTrades;
+            })
+            .catch(error => console.error("Error fetching initial config:", error));
+
+        // Handle form submission
+        document.getElementById("configForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+
+            // Create an object with the form data
+            const configData = {
+                levels: parseInt(formData.get("levels")),
+                selectedCandle: formData.get("selectedCandle"),
+                monitoringStatus: formData.get("monitoringStatus") === "on",
+                realTrades: formData.get("realTrades") === "on",
+            };
+
+            // Update the configuration via the API
+            updateConfiguration(configData);
+        });
+    </script>
+</body>
+</html>
