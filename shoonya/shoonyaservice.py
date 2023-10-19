@@ -19,6 +19,7 @@ app_key = "456bd303324fa7cf27fdcbe164a8a200"
 pwd = "Dimpy@2503"
 imei = "abc1234"
 susertoken = ""
+activeStrike = ""
 
 db_path = 'trades.db'
 trade_service = TradeService(db_path)
@@ -27,6 +28,7 @@ ltp = 0
 upperLevel = 0
 lowerLevel = 0
 activeTrade = False
+
 
 def login(totp):
     try:
@@ -78,10 +80,37 @@ def open_callback():
 
 def event_handler_quote_update(message):
     global ltp
+    global activeTrade
     # print("quote event: {0}".format(time.strftime('%d-%m-%Y %H:%M:%S')) + str(message))
     print(message['lp'])
     if message['lp']:
         ltp = message['lp']
+        if activeTrade:
+            exitTrade(ltp)
+
+
+def exitTrade(close):
+    global activeTrade
+    current_time = datetime.datetime.now()
+    time_string = current_time.strftime("%I:%M %p")
+    if activeStrike == "CE" and close >= upperLevel:
+        trade_entry = {
+            'marketAt': close,
+            'candleCloseAt': time_string,
+            'isBuying': True,
+            'type': 'CE'
+        }
+        trade_service.create_trade(trade_entry)
+        activeTrade = False
+    elif activeStrike == "PE" and close <= lowerLevel:
+        trade_entry = {
+            'marketAt': close,
+            'candleCloseAt': time_string,
+            'isBuying': True,
+            'type': 'CE'
+        }
+        trade_service.create_trade(trade_entry)
+        activeTrade = False
 
 
 def checkLevelCross(close):
@@ -111,6 +140,7 @@ def insertTrade(close, isUpperLevelCross):
     time_string = current_time.strftime("%I:%M %p")
 
     global activeTrade
+    global activeStrike
     if isUpperLevelCross:
         if not activeTrade:
             trade_entry = {
@@ -120,6 +150,7 @@ def insertTrade(close, isUpperLevelCross):
                 'type': 'CE'
             }
             trade_service.create_trade(trade_entry)
+            activeStrike = "CE"
             activeTrade = True
         elif activeTrade:
             trade_entry = {
@@ -140,6 +171,7 @@ def insertTrade(close, isUpperLevelCross):
                 'type': 'PE'
             }
             trade_service.create_trade(trade_entry)
+            activeStrike = "PE"
             activeTrade = True
         elif activeTrade:
             trade_entry = {
