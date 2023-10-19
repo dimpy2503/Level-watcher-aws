@@ -1,0 +1,49 @@
+# Virtual Environment
+venv/
+
+# Compiled Python Files
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment Configuration
+.env
+.env.*
+
+# Logs and Temporary Files
+logs/
+*.log
+tmp/
+
+# Dependency Directories
+.venv/ # Modify if using a different virtual environment directory
+
+# Database Files (if applicable)
+db.sqlite # Exclude if not using SQLite
+
+# IDE and Editor-Specific Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.pyc
+.DS_Store
+
+# Compiled Assets (JavaScript, CSS, etc.)
+static/gen/ # Modify according to your project structure
+
+# Configuration Files
+config.py # Exclude if it contains environment-specific configuration
+
+# Deployment-specific Files and Directories
+instance/
+deploy/
+
+config.json
+trades.db
+
+/config.json
+/trades.db
+
+./config.json
+./trades.db
