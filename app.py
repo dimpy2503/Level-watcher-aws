@@ -1,3 +1,5 @@
+import random
+import time
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request, jsonify, session, render_template, url_for, redirect
 import logging
@@ -69,6 +71,22 @@ def get_all_trades():
     return jsonify(trade_list)
 
 
+@app.route('/api/ledger-book', methods=['GET'])
+def get_all_ledger_entries():
+    ledger_entries = trade_service.get_all_ledger_entries()
+    ledger_list = [
+        {'id': entry[0], 'strike': entry[1], 'ltp': entry[2], 'time': entry[3]}
+        for entry in ledger_entries
+    ]
+    return jsonify(ledger_list)
+
+
+@app.route('/api/clear-ledger-book', methods=['DELETE'])
+def delete_all_ledger_entries():
+    trades = trade_service.delete_all_ledger_entries()
+    return {}
+
+
 @app.route('/api/clear-trades', methods=['DELETE'])
 def delete_all_trades():
     trades = trade_service.delete_all_trade()
@@ -78,10 +96,30 @@ def delete_all_trades():
 scheduler = BackgroundScheduler()
 
 # Schedule the event to run at the end of the 5th minute (replace 5 with your desired minute).
-scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='*', second=0)
+scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
 
 scheduler.start()
 
+# Initialize the random number
+random_number = random.randint(43100, 43500)
+
+
+# Function to update the random number every second
+def update_random_number():
+    global random_number
+    while True:
+        time.sleep(1)
+        random_number = random.randint(43100, 43500)
+        print(random_number)
+        shoonyaservice.checkLevelCross(random_number)
+
+
 if __name__ == "__main__":
     # app.run(debug=True)
+    import threading
+    shoonyaservice.downloadMaster()
+    # Start a separate thread to update the random number
+    update_thread = threading.Thread(target=update_random_number)
+    update_thread.daemon = True
+    # update_thread.start()
     app.run(host="0.0.0.0", port=port, debug=True)

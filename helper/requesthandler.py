@@ -46,22 +46,14 @@ def logout():
     return "index.html"
 
 
-config_data = {
-    "candles": ["1min", "5min", "15min", "30min", "1hour", "1day"],
-    "levels": 100,
-    "monitoringStatus": False,
-    "realTrades": False,
-    "selectedCandle": ""
-}
-
-
 def apiconfig():
-    return config_data
+    return shoonyaservice.config_data
 
 
 def updateconfig(newconfig):
-    config_data.update(newconfig)
-    shoonyaservice.startSocket()
+    if newconfig['monitoringStatus'] == True:
+        shoonyaservice.config_data.update(newconfig)
+        shoonyaservice.startSocket()
     return jsonify({"message": "Configuration updated successfully"})
 
 

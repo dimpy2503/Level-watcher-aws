@@ -8,49 +8,86 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 <body>
-<nav class="navbar navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Dashboard</a>
-    <ul class="nav">
-        <li class="nav-item">
-            <a class="nav-link" href="/dashboard">Home</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/config">Config</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/logout">Logout</a>
-        </li>
-    </ul>
-</nav>
+    <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Dashboard</a>
+        <ul class="nav">
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/config">Config</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </nav>
 
-<!-- Add the main content of your dashboard here -->
-<div class="container mt-4">
-    <!-- Refresh button -->
-    <button id="refreshButton" class="btn btn-primary" onclick="refreshTrades()">Refresh Trades</button>
-    <button id="clearTradesButton" class="btn btn-danger" onclick="clearTrades()">Clear Trades</button>
+    <div class="container mt-4">
+        <!-- Tabs for Trades and Ledger Book -->
 
-    <!-- Table to display trades -->
-    <table class="table table-bordered mt-4">
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Market At</th>
-            <th>Candle Close At</th>
-            <th>Is Buying</th>
-            <th>Type</th>
-        </tr>
-        </thead>
-        <tbody id="tradeTableBody">
-        <!-- Trade data will be inserted here -->
-        </tbody>
-    </table>
-</div>
+        <ul class="nav nav-tabs" id="myTabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="trade-tab" data-toggle="tab" href="#trade" role="tab">Trade Entries</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="ledger-tab" data-toggle="tab" href="#ledger" role="tab">Ledger Book</a>
+            </li>
+        </ul>
 
-<!-- Include Bootstrap JS -->
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <div class="tab-content" id="myTabContent">
+            <!-- Trade Entries Tab -->
+            <div class="tab-pane fade show active" id="trade" role="tabpanel">
+                 <br>
+                <button id="refreshTradeButton" class="btn btn-primary" onclick="refreshTrades()">Refresh Trades</button>
+                <button id="clearTradesButton" class="btn btn-danger" onclick="clearTrades()">Clear Trades</button>
 
-<script>
-        // Function to refresh trades
+                <!-- Table to display Trade Entries -->
+                <table class="table table-bordered mt-4">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Market At</th>
+                            <th>Candle Close At</th>
+                            <th>Is Buying</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tradeTableBody">
+                        <!-- Trade data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Ledger Book Tab -->
+            <div class="tab-pane fade" id="ledger" role="tabpanel">
+                 <br>
+                <button id="refreshLedgerButton" class="btn btn-primary" onclick="refreshLedgerEntries()">Refresh Ledger Book</button>
+                <button id="clearLedgerButton" class="btn btn-danger" onclick="clearLedgerBook()">Clear Ledger Book</button>
+
+                <!-- Table to display Ledger Book Entries -->
+                <table class="table table-bordered mt-4">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Strike</th>
+                            <th>LTP</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ledgerTableBody">
+                        <!-- Ledger book data will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        // Function to refresh Trades
         function refreshTrades() {
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "/api/trades", true);
@@ -73,27 +110,63 @@
             xhr.send();
         }
 
-         function clearTrades() {
-        $.ajax({
-            type: "DELETE",
-            url: "/api/clear-trades",
-            success: function (response) {
-                // Trades are cleared, so refresh the table
-                refreshTrades();
-            },
-            error: function (error) {
-                console.log("Error clearing trades:", error);
-            }
-        });
-    }
+        // Function to clear Trades
+        function clearTrades() {
+            $.ajax({
+                type: "DELETE",
+                url: "/api/clear-trades",
+                success: function (response) {
+                    // Trades are cleared, so refresh the table
+                    refreshTrades();
+                },
+                error: function (error) {
+                    console.log("Error clearing Trades:", error);
+                }
+            });
+        }
 
-         $(document).ready(function () {
+        // Function to refresh Ledger Book Entries
+        function refreshLedgerEntries() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/api/ledger-book", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    var tableBody = document.getElementById("ledgerTableBody");
+                    tableBody.innerHTML = ""; // Clear the existing data
+
+                    data.forEach(function (entry) {
+                        var row = tableBody.insertRow(tableBody.rows.length);
+                        row.insertCell(0).textContent = entry.id;
+                        row.insertCell(1).textContent = entry.strike;
+                        row.insertCell(2).textContent = entry.ltp;
+                        row.insertCell(3).textContent = entry.time;
+                    });
+                }
+            };
+            xhr.send();
+        }
+
+        // Function to clear Ledger Book Entries
+        function clearLedgerBook() {
+            $.ajax({
+                type: "DELETE",
+                url: "/api/clear-ledger-book",
+                success: function (response) {
+                    // Ledger book entries are cleared, so refresh the table
+                    refreshLedgerEntries();
+                },
+                error: function (error) {
+                    console.log("Error clearing Ledger Book entries:", error);
+                }
+            });
+        }
+
+        // Call the refresh functions when the page loads
+        $(document).ready(function () {
             refreshTrades();
+            refreshLedgerEntries();
         });
-
-
-
-
-</script>
+    </script>
 </body>
 </html>

@@ -18,6 +18,46 @@ class TradeService:
             )
         ''')
         self.conn.commit()
+        self.cursor.execute('''
+            CREATE TABLE IF NOT EXISTS ledger_book (
+                id INTEGER PRIMARY KEY,
+                strike REAL,
+                ltp REAL,
+                time TEXT
+            )
+        ''')
+        self.conn.commit()
+
+    def create_ledger_entry(self, entry):
+        sql = 'INSERT INTO ledger_book (strike, ltp, time) VALUES (?, ?, ?)'
+        self.cursor.execute(sql, (entry['strike'], entry['ltp'], entry['time']))
+        self.conn.commit()
+        return self.cursor.lastrowid
+
+    def get_ledger_entry(self, entry_id):
+        sql = 'SELECT * FROM ledger_book WHERE id = ?'
+        self.cursor.execute(sql, (entry_id,))
+        return self.cursor.fetchone()
+
+    def get_all_ledger_entries(self):
+        sql = 'SELECT * FROM ledger_book'
+        self.cursor.execute(sql)
+        return self.cursor.fetchall()
+
+    def update_ledger_entry(self, entry_id, entry):
+        sql = 'UPDATE ledger_book SET strike=?, ltp=?, time=? WHERE id=?'
+        self.cursor.execute(sql, (entry['strike'], entry['ltp'], entry['time'], entry_id))
+        self.conn.commit()
+
+    def delete_ledger_entry(self, entry_id):
+        sql = 'DELETE FROM ledger_book WHERE id = ?'
+        self.cursor.execute(sql, (entry_id,))
+        self.conn.commit()
+
+    def delete_all_ledger_entries(self):
+        sql = 'DELETE FROM ledger_book'
+        self.cursor.execute(sql)
+        self.conn.commit()
 
     def create_trade(self, trade):
         sql = 'INSERT INTO trades (marketAt, candleCloseAt, isBuying, type) VALUES (?, ?, ?, ?)'

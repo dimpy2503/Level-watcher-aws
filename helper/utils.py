@@ -1,3 +1,4 @@
+import csv
 import datetime
 import json
 import os
@@ -12,7 +13,7 @@ class DatetimeEncoder(json.JSONEncoder):
 
 
 def warningMessege(messege):
-    return { '<div class="alert alert-danger" role="alert">' + messege + '</div>'}
+    return {'<div class="alert alert-danger" role="alert">' + messege + '</div>'}
 
 
 def successMessege(messege):
@@ -37,6 +38,22 @@ def readJson(file_name):
             return loaded_data
         except json.JSONDecodeError as e:
             print(f"Error decoding JSON from {file_name}.json: {str(e)}")
+            return None
+    else:
+        return False
+
+
+def readFile(file_path):
+    if os.path.exists(file_path):
+        try:
+            data = []
+            with open(file_path, newline='') as csvfile:
+                csv_reader = csv.DictReader(csvfile)
+                for row in csv_reader:
+                    data.append(row)
+            return data
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON from {file_path} {str(e)}")
             return None
     else:
         return False

@@ -1,3 +1,55 @@
-ssh -i ./python_key.pem ec2-user@15.206.72.200
+connect to server
+ssh -i ./python_key.pem ubuntu@65.2.30.207
+
+update libs
+sudo apt update
+sudo apt upgrade
+
+Install Python:
+Ubuntu typically comes with Python 3 pre-installed. To check your Python version:
+python3 --version
+
+If Python 3 is not installed, you can install it using the package manager:
+sudo apt install python3
+
+Installing pip:
+pip is a package manager for Python. You should install it if it's not already present:
+sudo apt install python3-pip
+
+Check the installed version:
+pip3 --version
+
+[//]: # (we need to do this to link github account with server so we can clone code)
+
+Generate an SSH Key on Your Server:
+ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+
+Display the Public Key:
+cat ~/.ssh/id_rsa.pub
+
+Grant Repository Access:
+To use this deploy key with a specific repository, follow these steps:
+Go to the repository on GitHub.
+Click on "Settings" in the top right.
+In the left sidebar, click on "Deploy keys."
+Click on "Add deploy key."
+Give the key a title.
+Paste your public key into the "Key" field.
+Check the "Allow write access" option if your deployment process requires write access to the repository (e.g., for pushing changes).
+Click "Add key."
+
+clone repository
+git clone git@github.com:shaileshBhokare/bn-level-watcher.git
+
+move to project folder
+cd bn-level-watcher/
+
+install project libs
+pip3 install -r requirements.txt
+
+run project
 flask run --host=0.0.0.0 --port=5000
-http://15.206.72.200:5000
+
+http://<server-ip>:5000
+
+pm2 start app.py --name "flask-app"
