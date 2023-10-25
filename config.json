@@ -1,5 +1,5 @@
 {
-    "request_time": "12:00:09 25-10-2023",
+    "request_time": "21:24:00 25-10-2023",
     "actid": "FA54939",
     "access_type": [
         "WEB",
@@ -140,7 +140,7 @@
         }
     ],
     "stat": "Ok",
-    "susertoken": "880e9b9806b07cb31a47ed5735937ced0610346e6781ccd2080f0766960a09a9",
+    "susertoken": "a6b252022768ef15961d77aa817e45fdf876bb3bc2046766cde7ec4956283c43",
     "email": "dimpy.sharma@hotmail.com",
     "uid": "FA54939",
     "brnchid": "HO",
@@ -207,5 +207,5 @@
         ]
     },
     "brkname": "FINV",
-    "lastaccesstime": "1698215409"
+    "lastaccesstime": "1698249240"
 }

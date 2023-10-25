@@ -114,7 +114,7 @@ def exitTrade(close):
             'type': 'CE'
         }
         trade_service.create_trade(trade_entry)
-        placeOrders(upperLevel, 'CE', True)
+        placeOrders(upperLevel, 'CE', False)
         activeTrade = False
     elif activeStrike == "PE" and close <= lowerLevel:
         trade_entry = {
@@ -124,7 +124,7 @@ def exitTrade(close):
             'type': 'CE'
         }
         trade_service.create_trade(trade_entry)
-        placeOrders(lowerLevel, 'CE', True)
+        placeOrders(lowerLevel, 'PE', False)
         activeTrade = False
 
 
@@ -132,13 +132,17 @@ def checkLevelCross(close):
     global upperLevel
     global lowerLevel
 
-    if upperLevel == 0:
+    print(upperLevel, lowerLevel, close)
+
+    if upperLevel == 0 or lowerLevel == 0:
         upperLevel = round(close / 100) * 100
         lowerLevel = math.floor(close / 100) * 100
 
-    if lowerLevel == 0:
-        upperLevel = round(close / 100) * 100
-        lowerLevel = math.floor(close / 100) * 100
+    # if lowerLevel == 0:
+    #     upperLevel = round(close / 100) * 100
+    #     lowerLevel = math.floor(close / 100) * 100
+
+    print('levels', upperLevel, lowerLevel)
 
     if close >= upperLevel:
         insertTrade(close, True)
@@ -238,20 +242,24 @@ def CandleCloseEvent():
     global ltp
     if ltp == 0:
         print("TLP is 0")
-    elif config_data['monitoringStatus'] == True:
-        current_time = datetime.now()
-        current_minute = current_time.minute
-        # if current_minute % 5 == 0:
-        #     checkLevelCross(ltp)
-        #     print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
-        # else:
-        #     print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
+        return
 
-        if current_minute in [15, 30, 45, 0]:
-            checkLevelCross(ltp)
-            print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
-        else:
-            print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
+    checkLevelCross(ltp)
+
+    # elif config_data['monitoringStatus'] == True:
+    #     current_time = datetime.now()
+    #     current_minute = current_time.minute
+    #     # if current_minute % 5 == 0:
+    #     #     checkLevelCross(ltp)
+    #     #     print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
+    #     # else:
+    #     #     print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
+    #
+    #     if current_minute in [15, 30, 45, 0]:
+    #         checkLevelCross(ltp)
+    #         print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
+    #     else:
+    #         print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
 
 
 def stopSocket():
@@ -364,6 +372,19 @@ def getPrice(token):
     exch = 'NSE'
     ret = api.get_quotes(exchange=exch, token=token)
     print(ret)
+
+
+def mockTest(close):
+    global ltp
+    global upperLevel
+    global lowerLevel
+    ltp = close
+    if upperLevel == 0 or lowerLevel == 0:
+        print('mockTest levels', upperLevel, lowerLevel)
+        checkLevelCross(ltp);
+
+    if activeTrade:
+        exitTrade(ltp)
 
 
 # login("")
