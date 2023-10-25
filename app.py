@@ -97,7 +97,7 @@ scheduler = BackgroundScheduler()
 
 # Schedule the event to run at the end of the 5th minute (replace 5 with your desired minute).
 # scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
-scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='*', second=0)
+scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
 
 
 scheduler.start()
@@ -122,5 +122,5 @@ if __name__ == "__main__":
     # Start a separate thread to update the random number
     update_thread = threading.Thread(target=update_random_number)
     update_thread.daemon = True
-    update_thread.start()
+    # update_thread.start()
     app.run(host="0.0.0.0", port=port, debug=True)

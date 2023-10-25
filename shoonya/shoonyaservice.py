@@ -244,8 +244,7 @@ def CandleCloseEvent():
         print("TLP is 0")
         return
 
-    checkLevelCross(ltp)
-
+    # checkLevelCross(ltp)
     # elif config_data['monitoringStatus'] == True:
     #     current_time = datetime.now()
     #     current_minute = current_time.minute
@@ -255,11 +254,11 @@ def CandleCloseEvent():
     #     # else:
     #     #     print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
     #
-    #     if current_minute in [15, 30, 45, 0]:
-    #         checkLevelCross(ltp)
-    #         print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
-    #     else:
-    #         print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
+        if current_minute in [15, 30, 45, 0]:
+            checkLevelCross(ltp)
+            print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
+        else:
+            print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
 
 
 def stopSocket():
