@@ -105,21 +105,21 @@ random_number = random.randint(43100, 43500)
 
 
 # Function to update the random number every second
-def update_random_number():
-    global random_number
-    while True:
-        time.sleep(1)
-        random_number = random.randint(43100, 43500)
-        print(random_number)
-        shoonyaservice.checkLevelCross(random_number)
+# def update_random_number():
+#     global random_number
+#     while True:
+#         time.sleep(1)
+#         random_number = random.randint(43100, 43500)
+#         print(random_number)
+#         shoonyaservice.checkLevelCross(random_number)
 
 
 if __name__ == "__main__":
     # app.run(debug=True)
-    import threading
+    # import threading
     shoonyaservice.downloadMaster()
     # Start a separate thread to update the random number
-    update_thread = threading.Thread(target=update_random_number)
-    update_thread.daemon = True
+    # update_thread = threading.Thread(target=update_random_number)
+    # update_thread.daemon = True
     # update_thread.start()
     app.run(host="0.0.0.0", port=port, debug=True)
