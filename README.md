@@ -53,3 +53,6 @@ flask run --host=0.0.0.0 --port=5000
 http://<server-ip>:5000
 
 pm2 start app.py --name "flask-app"
+sudo pm2 start app.py --name "flask-app" --output ./logs/out.log --error ./logs/error.log
+
+sudo pm2 start app.py --name "flask-app" --interpreter python3 --output ./logs/out.log --error ./logs/error.log
