@@ -141,7 +141,7 @@ class TradingApp:
             # insert trade
 
     def CandleCloseEvent(self):
-        current_time = datetime.datetime.now()
+        current_time = datetime.now()
         current_minute = current_time.minute
 
         if self.freeze:
@@ -150,6 +150,7 @@ class TradingApp:
             self.freeze = True
             if self.ltp == 0:
                 print("ltp is 0")
+                self.freeze = False
                 return
             else:
                 if current_minute in [15, 30, 45, 0]:
@@ -332,6 +333,7 @@ class TradingApp:
             else:
                 self.freeze = True
                 self.ltp = message['lp']
+                print(self.ltp)
                 if self.upperLevel == 0 or self.lowerLevel == 0:
                     print('mockTest levels', self.upperLevel, self.lowerLevel, self.freeze)
                     self.checkLevelCross();
