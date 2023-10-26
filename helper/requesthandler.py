@@ -1,10 +1,6 @@
-import datetime
-import json
+from flask import make_response, jsonify
 
-from flask import make_response, redirect, jsonify
-
-from helper import utils
-from shoonya import shoonyaservice
+from shoonya.shoonyaservice import TradingApp
 
 http_status_codes = {
     "CONTINUE": 100,
@@ -25,9 +21,12 @@ selectedCandle = ""
 monitoringStatus = True
 realTrades = False
 
+trading_app = TradingApp()
+trading_app.setSession()
+
 
 def login():
-    res = shoonyaservice.getHoldings()
+    res = trading_app.getHoldings()
     if res:
         return "dashboard.html"
     else:
@@ -35,30 +34,30 @@ def login():
 
 
 def authenticate(totp):
-    if shoonyaservice.login(totp):
+    if trading_app.login(totp):
         return "dashboard"
     else:
         return make_response("Login failed", http_status_codes.get("BAD_REQUEST"))
 
 
 def logout():
-    shoonyaservice.logout()
+    trading_app.logout()
     return "index.html"
 
 
 def apiconfig():
-    return shoonyaservice.config_data
+    return trading_app.config_data
 
 
 def updateconfig(newconfig):
     if newconfig['monitoringStatus'] == True:
-        shoonyaservice.config_data.update(newconfig)
-        shoonyaservice.startSocket()
+        trading_app.config_data.update(newconfig)
+        trading_app.startSocket()
     return jsonify({"message": "Configuration updated successfully"})
 
 
 def config():
-    res = shoonyaservice.getHoldings()
+    res = trading_app.getHoldings()
     if res:
         return "config.html"
     else:
