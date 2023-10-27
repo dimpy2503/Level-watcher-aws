@@ -328,12 +328,12 @@ class TradingApp:
         return
 
     def event_handler_quote_update(self, message):
-        if message['lp']:
+        if message['lp'] != None:
             if self.freeze:
                 return
             else:
                 self.freeze = True
-                self.ltp = message['lp']
+                self.ltp = int(float(message['lp']))
                 print(self.ltp)
                 if self.upperLevel == 0 or self.lowerLevel == 0:
                     print('mockTest levels', self.upperLevel, self.lowerLevel, self.freeze)
