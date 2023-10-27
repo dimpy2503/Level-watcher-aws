@@ -153,6 +153,7 @@ class TradingApp:
                 self.freeze = False
                 return
             else:
+                print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
                 # if current_minute in [15, 30, 45, 0]:
                 if current_minute in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 0]:
                     self.checkLevelCross()
