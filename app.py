@@ -118,7 +118,11 @@ if __name__ == "__main__":
     update_thread.daemon = True
     # update_thread.start()
 
-    scheduler = BackgroundScheduler()
+    try:
+        scheduler = BackgroundScheduler()
+        # Add your job scheduling code here
+    except Exception as e:
+        print(f"An error occurred: {e}")
     # Schedule the event to run at the end of the 5th minute (replace 5 with your desired minute).
     # scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
     # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
