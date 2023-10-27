@@ -153,12 +153,13 @@ class TradingApp:
                 self.freeze = False
                 return
             else:
-                if current_minute in [15, 30, 45, 0]:
+                # if current_minute in [15, 30, 45, 0]:
+                if current_minute in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 0]:
                     self.checkLevelCross()
-                    # print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
+                # print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
                 else:
                     print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
-            self.freeze = False
+        self.freeze = False
 
     def tradeAction(self, close, isUpperLevelCross):
         current_time = datetime.now()
