@@ -33,11 +33,11 @@ class TradingApp:
         self.downloadBook = False
         self.socket_opened = False
         self.config_data = {
-            "candles": ["1min", "5min", "15min", "30min", "1hour", "1day"],
+            "candles": ["1min", "5min", "15min", "30min", "1hour"],
             "levels": 100,
             "monitoringStatus": False,
             "realTrades": False,
-            "selectedCandle": ""
+            "selectedCandle": "15min"
         }
 
     def login(self, totp):
@@ -68,9 +68,14 @@ class TradingApp:
         except Exception as e:
             return False
 
-    # def logout(self):
-    #     self.api.close_websocket()
-    #     self.api.logout()
+    def logout(self):
+        self.closeSocket()
+        self.api.logout()
+
+    def closeSocket(self):
+        if self.activeTrade:
+            self.exitTrade(self.ltp, True)
+        self.api.close_websocket()
 
     def downloadMaster(self):
         global downloadBook
@@ -103,7 +108,7 @@ class TradingApp:
     def mockTest(self, close):
         if self.freeze:
             return
-        else:
+        elif self.config_data['monitoringStatus']:
             self.freeze = True
             self.ltp = close
             if self.upperLevel == 0 or self.lowerLevel == 0:
@@ -114,6 +119,9 @@ class TradingApp:
                 self.exitTrade(self.ltp)
 
             self.freeze = False
+        else:
+            print(f"Status is {self.config_data['monitoringStatus']}")
+        print(f"Status is {self.config_data['monitoringStatus']}")
 
     def checkLevelCross(self):
 
@@ -148,19 +156,29 @@ class TradingApp:
             return
         else:
             self.freeze = True
+            print(f"ltp is {self.ltp}")
+            print(f"config_data {self.config_data}")
+
             if self.ltp == 0:
-                print("ltp is 0")
                 self.freeze = False
                 return
-            else:
-                print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
-                # if current_minute in [15, 30, 45, 0]:
-                if current_minute in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 0]:
+            elif self.config_data['monitoringStatus']:
+                selectedCandle = self.config_data['selectedCandle']
+                print(f"End of {selectedCandle} candle at minute {current_minute} time {current_time}")
+                # ["1min", "5min", "15min", "30min", "1hour"],
+                if selectedCandle == '5min' and current_minute in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 0]:
                     self.checkLevelCross()
-                # print(f"End of 5-minute candle at minute {current_minute} time {current_time}")
+                elif selectedCandle == '15min' and current_minute in [15, 30, 45, 0]:
+                    self.checkLevelCross()
+                elif selectedCandle == '30min' and current_minute in [30, 0]:
+                    self.checkLevelCross()
+                elif selectedCandle == '1hour' and current_minute in [0]:
+                    self.checkLevelCross()
+                elif selectedCandle == '1min':
+                    self.checkLevelCross()
                 else:
                     print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
-        self.freeze = False
+            self.freeze = False
 
     def tradeAction(self, close, isUpperLevelCross):
         current_time = datetime.now()
@@ -200,10 +218,10 @@ class TradingApp:
         self.trade_service.create_trade(trade_entry)
         self.activeStrike = type
 
-    def exitTrade(self, close):
+    def exitTrade(self, close, forceexit=False):
         current_time = datetime.now()
         time_string = current_time.strftime("%I:%M %p")
-        if self.activeStrike == "CE" and close >= self.upperLevel:
+        if self.activeStrike == "CE" and (forceexit or close >= self.upperLevel):
             trade_entry = {
                 'marketAt': close,
                 'candleCloseAt': time_string,
@@ -213,7 +231,7 @@ class TradingApp:
             self.trade_service.create_trade(trade_entry)
             self.placeOrders(self.upperLevel, 'CE', False)
             self.activeTrade = False
-        elif self.activeStrike == "PE" and close <= self.lowerLevel:
+        elif self.activeStrike == "PE" and (forceexit or close <= self.lowerLevel):
             trade_entry = {
                 'marketAt': close,
                 'candleCloseAt': time_string,
@@ -337,7 +355,7 @@ class TradingApp:
                 self.ltp = int(float(message['lp']))
                 print(self.ltp)
                 if self.upperLevel == 0 or self.lowerLevel == 0:
-                    print('mockTest levels', self.upperLevel, self.lowerLevel, self.freeze)
+                    print('levels', self.upperLevel, self.lowerLevel, self.freeze)
                     self.checkLevelCross();
                 if self.activeTrade:
                     self.exitTrade(self.ltp)
@@ -346,3 +364,11 @@ class TradingApp:
     def open_callback(self):
         self.socket_opened = True
         self.api.subscribe('NSE|26009')
+
+    def getLtp(self):
+        strike = self.filterBankNiftyOptions('43700', 'CE')
+        lastBusDay = datetime.today() - 30
+        lastBusDay = lastBusDay.replace(hour=0, minute=0, second=0, microsecond=0)
+        ret = self.api.get_time_price_series(exchange=strike['Exchange'], token=strike['Token'],
+                                             starttime=lastBusDay.timestamp(), interval=5)
+        print('ret', ret)

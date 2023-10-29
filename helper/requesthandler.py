@@ -21,8 +21,19 @@ selectedCandle = ""
 monitoringStatus = True
 realTrades = False
 
-trading_app = TradingApp()
-trading_app.setSession()
+
+# trading_app = TradingApp()
+# trading_app.setSession()
+
+
+def reinitialize_trading_app():
+    global trading_app  # Use the global variable
+    trading_app = TradingApp()  # Create a new instance of the TradingApp class
+    trading_app.setSession()
+
+
+def CandleCloseEvent():
+    trading_app.CandleCloseEvent()
 
 
 def login():
@@ -50,9 +61,14 @@ def apiconfig():
 
 
 def updateconfig(newconfig):
-    if newconfig['monitoringStatus'] == True:
-        trading_app.config_data.update(newconfig)
-        trading_app.startSocket()
+    trading_app.config_data.update(newconfig)
+    print(trading_app.config_data)
+    if newconfig['monitoringStatus']:
+        # trading_app.startSocket()
+        1
+    else:
+        trading_app.closeSocket()
+        reinitialize_trading_app()
     return jsonify({"message": "Configuration updated successfully"})
 
 
@@ -62,3 +78,7 @@ def config():
         return "config.html"
     else:
         return "index.html"
+
+
+reinitialize_trading_app()
+# trading_app.getLtp()

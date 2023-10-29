@@ -92,6 +92,7 @@ def delete_all_ledger_entries():
 @app.route('/api/clear-trades', methods=['DELETE'])
 def delete_all_trades():
     trades = trade_service.delete_all_trade()
+    trades = trade_service.delete_all_ledger_entries()
     return {}
 
 
@@ -108,7 +109,7 @@ def update_random_number():
         with random_number_lock:
             random_number = new_random
         requesthandler.trading_app.mockTest(new_random)
-        time.sleep(1)
+        time.sleep(10)
 
 
 if __name__ == "__main__":
@@ -116,7 +117,7 @@ if __name__ == "__main__":
     # Start a separate thread to update the random number
     update_thread = threading.Thread(target=update_random_number)
     update_thread.daemon = True
-    # update_thread.start()
+    update_thread.start()
 
     try:
         scheduler = BackgroundScheduler()
@@ -127,8 +128,9 @@ if __name__ == "__main__":
     # scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
     # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
     # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
-    scheduler.add_job(requesthandler.trading_app.CandleCloseEvent, 'cron', minute='*')
+    scheduler.add_job(requesthandler.CandleCloseEvent, 'cron', minute='*')
     # scheduler.add_job(requesthandler.trading_app.CandleCloseEvent, 'cron', second='*')
     scheduler.start()
 
     app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)
+    # app.run(host="0.0.0.0", port=port, debug=True)
