@@ -1,12 +1,14 @@
 import random
 import time
-from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request, jsonify, session, render_template, url_for, redirect
 import logging
 from dotenv import load_dotenv
 from helper import requesthandler
 from helper.tradeservice import TradeService
 import threading
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 from shoonya.shoonyaservice import TradingApp
 
@@ -120,7 +122,7 @@ if __name__ == "__main__":
     update_thread.start()
 
     try:
-        scheduler = BackgroundScheduler()
+        scheduler = BlockingScheduler()
         # Add your job scheduling code here
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -128,7 +130,8 @@ if __name__ == "__main__":
     # scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
     # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
     # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
-    scheduler.add_job(requesthandler.CandleCloseEvent, 'cron', minute='*')
+    # scheduler.add_job(requesthandler.CandleCloseEvent, 'cron', minute='*')
+    scheduler.add_job(requesthandler.CandleCloseEvent, CronTrigger.from_crontab('* * * * *'))
     # scheduler.add_job(requesthandler.trading_app.CandleCloseEvent, 'cron', second='*')
     scheduler.start()
 
