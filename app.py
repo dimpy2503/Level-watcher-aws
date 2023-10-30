@@ -120,7 +120,9 @@ if __name__ == "__main__":
         # Start a separate thread to update the random number
         update_thread = threading.Thread(target=update_random_number)
         update_thread.daemon = True
+        print("Starting update_thread...")
         update_thread.start()
+        print("update_thread started.")
 
         scheduler = BlockingScheduler()
         # Add your job scheduling code here
