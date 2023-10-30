@@ -116,6 +116,7 @@ def update_random_number():
 
 if __name__ == "__main__":
     try:
+        app.debug = True
         requesthandler.trading_app.downloadMaster()
         # Start a separate thread to update the random number
         update_thread = threading.Thread(target=update_random_number)
