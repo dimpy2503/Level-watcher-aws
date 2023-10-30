@@ -64,7 +64,7 @@ def updateconfig(newconfig):
     trading_app.config_data.update(newconfig)
     print(trading_app.config_data)
     if newconfig['monitoringStatus']:
-        # trading_app.startSocket()
+        trading_app.startSocket()
         1
     else:
         trading_app.closeSocket()

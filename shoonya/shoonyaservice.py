@@ -156,15 +156,14 @@ class TradingApp:
             return
         else:
             self.freeze = True
-            print(f"ltp is {self.ltp}")
-            print(f"config_data {self.config_data}")
-
+            # print(f"ltp is {self.ltp}")
+            # print(f"config_data {self.config_data}")
             if self.ltp == 0:
                 self.freeze = False
                 return
             elif self.config_data['monitoringStatus']:
                 selectedCandle = self.config_data['selectedCandle']
-                print(f"End of {selectedCandle} candle at minute {current_minute} time {current_time}")
+                # print(f"End of {selectedCandle} candle at minute {current_minute} time {current_time}")
                 # ["1min", "5min", "15min", "30min", "1hour"],
                 if selectedCandle == '5min' and current_minute in [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 0]:
                     self.checkLevelCross()
@@ -177,7 +176,8 @@ class TradingApp:
                 elif selectedCandle == '1min':
                     self.checkLevelCross()
                 else:
-                    print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
+                    # print(f"Not the end of 5-minute candle at minute {current_minute} time {current_time}")
+                    1
             self.freeze = False
 
     def tradeAction(self, close, isUpperLevelCross):
