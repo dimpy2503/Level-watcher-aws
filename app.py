@@ -1,16 +1,12 @@
 import random
 import time
-from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, request, jsonify, session, render_template, url_for, redirect
 import logging
 from dotenv import load_dotenv
 from helper import requesthandler
 from helper.tradeservice import TradeService
 import threading
-# from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.triggers.cron import CronTrigger
-
-from shoonya.shoonyaservice import TradingApp
+from flask_apscheduler import APScheduler
 
 load_dotenv()
 import os
@@ -18,9 +14,16 @@ import os
 port = os.getenv("port")
 db_path = 'trades.db'
 
+# set configuration values
+class Config:
+    SCHEDULER_API_ENABLED = True
+
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
+app.config.from_object(Config())
 app.secret_key = os.urandom(24)
+
+scheduler = APScheduler()
 
 trade_service = TradeService(db_path)
 
@@ -113,27 +116,30 @@ def update_random_number():
         requesthandler.trading_app.mockTest(new_random)
         time.sleep(10)
 
+# cron examples
+@scheduler.task('cron', id='do_job_2', minute='*')
+def job2():
+    print('Job 2 executed')
+
+
+requesthandler.trading_app.downloadMaster()
 
 if __name__ == "__main__":
-    requesthandler.trading_app.downloadMaster()
     # Start a separate thread to update the random number
     update_thread = threading.Thread(target=update_random_number)
     update_thread.daemon = True
-    update_thread.start()
+    # update_thread.start()
 
-    try:
-        scheduler = BackgroundScheduler()
-        # Add your job scheduling code here
-    except Exception as e:
-        print(f"An error occurred: {e}")
     # Schedule the event to run at the end of the 5th minute (replace 5 with your desired minute).
     # scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
     # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
     # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
-    scheduler.add_job(requesthandler.CandleCloseEvent, 'cron', minute='*')
+    # scheduler.add_job(requesthandler.CandleCloseEvent, 'cron', minute='*')
     # scheduler.add_job(requesthandler.CandleCloseEvent, CronTrigger.from_crontab('* * * * *'))
     # scheduler.add_job(requesthandler.trading_app.CandleCloseEvent, 'cron', second='*')
-    scheduler.start()
+    # scheduler.start()
 
+    scheduler.init_app(app)
+    scheduler.start()
     app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)
     # app.run(host="0.0.0.0", port=port, debug=True)
