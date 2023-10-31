@@ -1,0 +1,7 @@
+Flask==3.0.0
+Flask_APScheduler==1.13.0
+NorenRestApiPy==0.0.22
+NorenRestApiPy==0.0.22
+pandas==2.1.2
+python-dotenv==1.0.0
+Requests==2.31.0
