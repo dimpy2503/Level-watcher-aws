@@ -1,5 +1,7 @@
 connect to server
-ssh -i ./python_key.pem ubuntu@65.2.30.207
+
+[//]: # (ssh -i ./python_key.pem ubuntu@65.2.30.207)
+ssh -i ./python_key.pem ubuntu@13.232.62.64
 
 update libs
 sudo apt update
