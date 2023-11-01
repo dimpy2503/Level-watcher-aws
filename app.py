@@ -10,6 +10,7 @@ from flask_apscheduler import APScheduler
 
 load_dotenv()
 import os
+os.environ['TZ'] = 'Asia/Kolkata'
 
 port = os.getenv("port")
 db_path = 'trades.db'
