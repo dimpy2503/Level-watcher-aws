@@ -1,7 +1,7 @@
 connect to server
 
 [//]: # (ssh -i ./python_key.pem ubuntu@65.2.30.207)
-ssh -i ./python_key.pem ubuntu@13.232.62.64
+ssh -i "python_key.pem" ec2-user@ec2-65-1-133-115.ap-south-1.compute.amazonaws.com
 
 update libs
 sudo apt update

@@ -2,7 +2,7 @@ import logging
 import math
 import os
 import zipfile
-from datetime import datetime
+from datetime import datetime, timedelta, date
 import requests
 from helper import utils
 from helper.tradeservice import TradeService
@@ -260,7 +260,7 @@ class TradingApp:
 
         entry = {
             'strike': self.activeTradeSymbol['TradingSymbol'],
-            'ltp': isBuy,
+            'ltp': self.getLtp(strike),
             'time': current_time_string
         }
         self.trade_service.create_ledger_entry(entry)
@@ -278,18 +278,10 @@ class TradingApp:
         unique_expiries = set(item['Expiry'] for item in banknifty)
         date_objects = [datetime.strptime(date_str, '%d-%b-%Y').date() for date_str in unique_expiries]
 
-        options_expiry = None
-        today = datetime.now().today().day
-        # today = 26
-
-        while options_expiry == None:
-            smallest_date_object = min(date_objects)
-            if smallest_date_object.day == today:
-                date_objects.remove(smallest_date_object)
-                continue
-            else:
-                options_expiry = smallest_date_object.strftime('%d-%b-%Y')
-                break
+        today = date.today()
+        filtered_dates = [d for d in date_objects if d > today]
+        smallest_greater_date = min(filtered_dates, default=None)
+        options_expiry = smallest_greater_date.strftime('%d-%b-%Y')
 
         # print('options_expiry', options_expiry)
 
@@ -365,10 +357,20 @@ class TradingApp:
         self.socket_opened = True
         self.api.subscribe('NSE|26009')
 
-    def getLtp(self):
-        strike = self.filterBankNiftyOptions('43700', 'CE')
-        lastBusDay = datetime.today() - 30
-        lastBusDay = lastBusDay.replace(hour=0, minute=0, second=0, microsecond=0)
+    def getLtp(self, strike):
+        # strike = self.filterBankNiftyOptions('43700', 'CE')
+        # print(strike)
+        lastBusDay = datetime.today()
+        lastBusDay = lastBusDay.replace(hour=15, minute=29, second=0, microsecond=0)
+        timestamp = lastBusDay.timestamp()
+
+        current_timestamp = int(time.time())
+        print("Current timestamp:", current_timestamp)
+
         ret = self.api.get_time_price_series(exchange=strike['Exchange'], token=strike['Token'],
-                                             starttime=lastBusDay.timestamp(), interval=5)
-        print('ret', ret)
+                                             starttime=current_timestamp, interval=1)
+
+        if ret is not None and len(ret) >= 1:
+            return ret[-1]['intc']
+        else:
+            return 0

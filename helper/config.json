@@ -1,5 +1,5 @@
 {
-    "request_time": "19:01:27 28-10-2023",
+    "request_time": "20:42:48 02-11-2023",
     "actid": "FA54939",
     "access_type": [
         "WEB",
@@ -24,6 +24,7 @@
             "s_prdt_ali": "NRML",
             "exch": [
                 "NFO",
+                "BFO",
                 "CDS",
                 "BCD",
                 "MCX",
@@ -37,6 +38,7 @@
                 "NSE",
                 "BSE",
                 "NFO",
+                "BFO",
                 "CDS",
                 "BCD",
                 "MCX",
@@ -137,10 +139,17 @@
                 "M",
                 "I"
             ]
+        },
+        {
+            "exch": "BFO",
+            "prds": [
+                "M",
+                "I"
+            ]
         }
     ],
     "stat": "Ok",
-    "susertoken": "638f063b302fd6b574620e2575bceea79f9ee67b12ff275500dddaf2b8ae9427",
+    "susertoken": "8a998d7eff137b8c24050be84ca8477df9b618247dc15ccf378b741ba4c81737",
     "email": "dimpy.sharma@hotmail.com",
     "uid": "FA54939",
     "brnchid": "HO",
@@ -161,7 +170,8 @@
         "BCD",
         "MCX",
         "BSTAR",
-        "NCX"
+        "NCX",
+        "BFO"
     ],
     "values": [
         "2"
@@ -207,5 +217,5 @@
         ]
     },
     "brkname": "FINV",
-    "lastaccesstime": "1698499887"
+    "lastaccesstime": "1698937968"
 }

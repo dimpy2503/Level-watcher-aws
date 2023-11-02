@@ -81,4 +81,4 @@ def config():
 
 
 reinitialize_trading_app()
-# trading_app.getLtp()
+# print(trading_app.getLtp())
