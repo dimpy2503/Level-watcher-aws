@@ -136,7 +136,7 @@ class TradingApp:
         print('levels ', "U:", self.upperLevel, " L:", self.lowerLevel, " C:", self.ltp)
         print("==========================================================")
 
-        if self.ltp >= self.upperLevel:
+        if self.ltp > self.upperLevel:
             self.tradeAction(self.ltp, True)
             self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
             self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level

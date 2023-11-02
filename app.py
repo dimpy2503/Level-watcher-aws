@@ -10,14 +10,17 @@ from flask_apscheduler import APScheduler
 
 load_dotenv()
 import os
+
 os.environ['TZ'] = 'Asia/Kolkata'
 
 port = os.getenv("port")
 db_path = 'trades.db'
 
+
 # set configuration values
 class Config:
     SCHEDULER_API_ENABLED = True
+
 
 logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
@@ -114,13 +117,16 @@ def update_random_number():
         new_random = random.randint(43100, 43900)
         with random_number_lock:
             random_number = new_random
+            print(random_number)
         requesthandler.trading_app.mockTest(new_random)
         time.sleep(10)
+
 
 # cron examples
 @scheduler.task('cron', id='do_job_2', minute='*')
 def job2():
     print('Job 2 executed')
+    requesthandler.trading_app.CandleCloseEvent()
 
 
 requesthandler.trading_app.downloadMaster()
@@ -129,7 +135,7 @@ if __name__ == "__main__":
     # Start a separate thread to update the random number
     update_thread = threading.Thread(target=update_random_number)
     update_thread.daemon = True
-    update_thread.start()
+    # update_thread.start()
 
     # Schedule the event to run at the end of the 5th minute (replace 5 with your desired minute).
     # scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
@@ -142,5 +148,5 @@ if __name__ == "__main__":
 
     scheduler.init_app(app)
     scheduler.start()
-    app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False)
+    app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False, threaded=True)
     # app.run(host="0.0.0.0", port=port, debug=True)
