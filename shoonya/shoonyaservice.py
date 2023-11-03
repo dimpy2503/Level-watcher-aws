@@ -358,19 +358,8 @@ class TradingApp:
         self.api.subscribe('NSE|26009')
 
     def getLtp(self, strike):
-        # strike = self.filterBankNiftyOptions('43700', 'CE')
-        # print(strike)
-        lastBusDay = datetime.today()
-        lastBusDay = lastBusDay.replace(hour=15, minute=29, second=0, microsecond=0)
-        timestamp = lastBusDay.timestamp()
-
-        current_timestamp = int(time.time())
-        print("Current timestamp:", current_timestamp)
-
-        ret = self.api.get_time_price_series(exchange=strike['Exchange'], token=strike['Token'],
-                                             starttime=current_timestamp, interval=1)
-
-        if ret is not None and len(ret) >= 1:
-            return ret[-1]['intc']
+        ret = self.api.get_quotes(exchange=strike['Exchange'], token=strike['Token'])
+        if 'lp' in ret:
+            return ret['lp']
         else:
             return 0

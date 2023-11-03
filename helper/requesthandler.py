@@ -81,4 +81,7 @@ def config():
 
 
 reinitialize_trading_app()
-# print(trading_app.getLtp())
+
+# strike = trading_app.filterBankNiftyOptions('43700', 'CE')
+# print(strike)
+# print(trading_app.getLtp(strike))

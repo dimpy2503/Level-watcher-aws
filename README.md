@@ -59,5 +59,12 @@ sudo pm2 start app.py --name "flask-app" --output ./logs/out.log --error ./logs/
 
 sudo pm2 start app.py --name "flask-app" --interpreter python3 --output ./logs/out.log --error ./logs/error.log
 
+source venv/bin/activate
 
 pm2 logs "flask-app" --lines 100
+
+nohup python3 app.py &
+
+ps aux | grep app.py
+
+kill pid
