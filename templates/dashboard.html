@@ -8,85 +8,91 @@
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">Dashboard</a>
-        <ul class="nav">
-            <li class="nav-item">
-                <a class="nav-link" href="/dashboard">Home</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/config">Config</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/logout">Logout</a>
-            </li>
-        </ul>
-    </nav>
+<nav class="navbar navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Dashboard</a>
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="/dashboard">Home</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/config">Config</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/logout">Logout</a>
+        </li>
+    </ul>
+</nav>
 
-    <div class="container mt-4">
-        <!-- Tabs for Trades and Ledger Book -->
+<div class="container mt-4">
+    <!-- Tabs for Trades and Ledger Book -->
 
-        <ul class="nav nav-tabs" id="myTabs">
-            <li class="nav-item">
-                <a class="nav-link active" id="trade-tab" data-toggle="tab" href="#trade" role="tab">Trade Entries</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="ledger-tab" data-toggle="tab" href="#ledger" role="tab">Ledger Book</a>
-            </li>
-        </ul>
+    <ul class="nav nav-tabs" id="myTabs">
+        <li class="nav-item">
+            <a class="nav-link active" id="trade-tab" data-toggle="tab" href="#trade" role="tab">Trade Entries</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="ledger-tab" data-toggle="tab" href="#ledger" role="tab">Ledger Book</a>
+        </li>
+    </ul>
 
-        <div class="tab-content" id="myTabContent">
-            <!-- Trade Entries Tab -->
-            <div class="tab-pane fade show active" id="trade" role="tabpanel">
-                 <br>
-                <button id="refreshTradeButton" class="btn btn-primary" onclick="refreshTrades()">Refresh Trades</button>
-                <button id="clearTradesButton" class="btn btn-danger" onclick="clearTrades()">Clear Trades</button>
+    <div class="tab-content" id="myTabContent">
+        <!-- Trade Entries Tab -->
+        <div class="tab-pane fade show active" id="trade" role="tabpanel">
+            <br>
+            <button id="refreshTradeButton" class="btn btn-primary" onclick="refreshTrades()">Refresh Trades</button>
+            <button id="clearTradesButton" class="btn btn-danger" onclick="clearTrades()">Clear Trades</button>
 
-                <!-- Table to display Trade Entries -->
-                <table class="table table-bordered mt-4">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Market At</th>
-                            <th>Candle Close At</th>
-                            <th>Is Buying</th>
-                            <th>Type</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tradeTableBody">
-                        <!-- Trade data will be inserted here -->
-                    </tbody>
-                </table>
-            </div>
+            <!-- Table to display Trade Entries -->
+            <table class="table table-bordered mt-4">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Market At</th>
+                    <th>Candle Close At</th>
+                    <th>Is Buying</th>
+                    <th>Type</th>
+                </tr>
+                </thead>
+                <tbody id="tradeTableBody">
+                <!-- Trade data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
 
-            <!-- Ledger Book Tab -->
-            <div class="tab-pane fade" id="ledger" role="tabpanel">
-                 <br>
-                <button id="refreshLedgerButton" class="btn btn-primary" onclick="refreshLedgerEntries()">Refresh Ledger Book</button>
-                <button id="clearLedgerButton" class="btn btn-danger" onclick="clearLedgerBook()">Clear Ledger Book</button>
+        <!-- Ledger Book Tab -->
+        <div class="tab-pane fade" id="ledger" role="tabpanel">
+            <br>
+            <button id="refreshLedgerButton" class="btn btn-primary" onclick="refreshLedgerEntries()">Refresh Ledger
+                Book
+            </button>
 
-                <!-- Table to display Ledger Book Entries -->
-                <table class="table table-bordered mt-4">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Strike</th>
-                            <th>LTP</th>
-                            <th>Time</th>
-                        </tr>
-                    </thead>
-                    <tbody id="ledgerTableBody">
-                        <!-- Ledger book data will be inserted here -->
-                    </tbody>
-                </table>
-            </div>
+            <button id="downloadLedgerButton" class="btn btn-primary" onclick="exportTableToCSV()">Export
+            </button>
+
+            <button id="clearLedgerButton" class="btn btn-danger" onclick="clearLedgerBook()">Clear Ledger Book</button>
+
+            <!-- Table to display Ledger Book Entries -->
+            <table class="table table-bordered mt-4" id="data-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Strike</th>
+                    <th>LTP</th>
+                    <th>Time</th>
+                </tr>
+                </thead>
+                <tbody id="ledgerTableBody">
+                <!-- Ledger book data will be inserted here -->
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
 
-    <!-- Include Bootstrap JS -->
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<!-- Include Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <script>
+<script>
         // Function to refresh Trades
         function refreshTrades() {
             var xhr = new XMLHttpRequest();
@@ -167,6 +173,42 @@
             refreshTrades();
 <!--            refreshLedgerEntries();-->
         });
-    </script>
+
+        function exportTableToCSV() {
+            const table = document.getElementById('data-table');
+            const rows = table.querySelectorAll('tbody tr');
+
+            // Initialize a string to store the CSV data
+            let csvData = 'Name,Age\n';
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const name = cells[0].textContent;
+                const age = cells[1].textContent;
+                csvData += `${name},${age}\n`;
+            });
+
+            // Create a Blob with the CSV data
+            const blob = new Blob([csvData], { type: 'text/csv' });
+
+            // Create a URL for the Blob
+            const url = URL.createObjectURL(blob);
+
+            // Create a link element to download the CSV file
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'table_data.csv';
+            a.style.display = 'none';
+
+            // Trigger a click event on the link to start the download
+            document.body.appendChild(a);
+            a.click();
+
+            // Clean up by removing the link and revoking the Blob URL
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+</script>
 </body>
 </html>
