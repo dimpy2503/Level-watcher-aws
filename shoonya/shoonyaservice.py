@@ -136,17 +136,18 @@ class TradingApp:
         print('levels ', "U:", self.upperLevel, " L:", self.lowerLevel, " C:", self.ltp)
         print("==========================================================")
 
-        if self.ltp > self.upperLevel:
-            self.tradeAction(self.ltp, True)
-            self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
-            self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level
-            # insert trade
+        if self.is_current_time_in_market():
+            if self.ltp > self.upperLevel:
+                self.tradeAction(self.ltp, True)
+                self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
+                self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level
+                # insert trade
 
-        elif self.ltp < self.lowerLevel:
-            self.tradeAction(self.ltp, False)
-            self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
-            self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level
-            # insert trade
+            elif self.ltp < self.lowerLevel:
+                self.tradeAction(self.ltp, False)
+                self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
+                self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level
+                # insert trade
 
     def CandleCloseEvent(self):
         current_time = datetime.now()
@@ -260,7 +261,7 @@ class TradingApp:
 
         entry = {
             'strike': self.activeTradeSymbol['TradingSymbol'],
-            'ltp': self.getLtp(strike),
+            'ltp': self.getLtp(self.activeTradeSymbol),
             'time': current_time_string
         }
         self.trade_service.create_ledger_entry(entry)
@@ -349,6 +350,10 @@ class TradingApp:
                 if self.upperLevel == 0 or self.lowerLevel == 0:
                     print('levels', self.upperLevel, self.lowerLevel, self.freeze)
                     self.checkLevelCross();
+
+                if self.is_current_time_in_market() == False and self.activeTrade:
+                    self.exitTrade(self.ltp, True)
+
                 if self.activeTrade:
                     self.exitTrade(self.ltp)
                 self.freeze = False
@@ -363,3 +368,9 @@ class TradingApp:
             return ret['lp']
         else:
             return 0
+
+    def is_current_time_in_market(self):
+        current_time = datetime.now().time()
+        start_time = datetime.strptime('09:15:00', '%H:%M:%S').time()
+        end_time = datetime.strptime('14:25:00', '%H:%M:%S').time()
+        return start_time < current_time < end_time
