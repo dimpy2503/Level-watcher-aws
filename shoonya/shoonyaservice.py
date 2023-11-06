@@ -79,7 +79,7 @@ class TradingApp:
 
     def downloadMaster(self):
         global downloadBook
-        root = 'https://shoonya.finvasia.com/'
+        root = 'https://api.shoonya.com/'
         # masters = ['NSE_symbols.txt.zip', 'NFO_symbols.txt.zip', 'CDS_symbols.txt.zip', 'MCX_symbols.txt.zip',
         #            'BSE_symbols.txt.zip']
         masters = ['NFO_symbols.txt.zip']
@@ -87,8 +87,9 @@ class TradingApp:
         folder = "./scripmasters/"
 
         for zip_file in masters:
-            print(f'downloading {zip_file}')
             url = root + zip_file
+            print(f'downloading {url}')
+
             r = requests.get(url, allow_redirects=True)
             open(folder + zip_file, 'wb').write(r.content)
             file_to_extract = zip_file.split()
