@@ -49,7 +49,7 @@ cd bn-level-watcher/
 install project libs
 pip3 install -r requirements.txt
 
-run project
+run project -> 
 flask run --host=0.0.0.0 --port=5000
 
 http://<server-ip>:5000
