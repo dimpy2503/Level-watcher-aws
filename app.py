@@ -86,7 +86,7 @@ def get_all_trades():
 def get_all_ledger_entries():
     ledger_entries = trade_service.get_all_ledger_entries()
     ledger_list = [
-        {'id': entry[0], 'strike': entry[1], 'ltp': entry[2], 'time': entry[3]}
+        {'id': entry[0], 'strike': entry[1], 'ltp': entry[2], 'time': entry[3], 'qty': entry[4]}
         for entry in ledger_entries
     ]
     return jsonify(ledger_list)

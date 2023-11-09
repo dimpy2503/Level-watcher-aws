@@ -23,14 +23,15 @@ class TradeService:
                 id INTEGER PRIMARY KEY,
                 strike REAL,
                 ltp REAL,
-                time TEXT
+                time TEXT,
+                qty TEXT
             )
         ''')
         self.conn.commit()
 
     def create_ledger_entry(self, entry):
-        sql = 'INSERT INTO ledger_book (strike, ltp, time) VALUES (?, ?, ?)'
-        self.cursor.execute(sql, (entry['strike'], entry['ltp'], entry['time']))
+        sql = 'INSERT INTO ledger_book (strike, ltp, time, qty) VALUES (?, ?, ?, ?)'
+        self.cursor.execute(sql, (entry['strike'], entry['ltp'], entry['time'], entry['qty']))
         self.conn.commit()
         return self.cursor.lastrowid
 

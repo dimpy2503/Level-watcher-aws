@@ -40,6 +40,10 @@
                     <label class="form-check-label" for="realTrades">Real Trades</label>
                 </div>
             </div>
+            <div class="form-group">
+                <label for="levels">QTY</label>
+                <input type="number" class="form-control" id="qty" name="qty">
+            </div>
             <div class="text-center">
                 <button type="submit" class="btn btn-primary">Save</button>
             </div>
@@ -84,6 +88,7 @@
                 document.getElementById("selectedCandle").value = data.selectedCandle;
                 document.getElementById("monitoringStatus").checked = data.monitoringStatus;
                 document.getElementById("realTrades").checked = data.realTrades;
+                document.getElementById("qty").value = data.qty;
             })
             .catch(error => console.error("Error fetching initial config:", error));
 
@@ -98,6 +103,7 @@
                 selectedCandle: formData.get("selectedCandle"),
                 monitoringStatus: formData.get("monitoringStatus") === "on",
                 realTrades: formData.get("realTrades") === "on",
+                qty: parseInt(formData.get("qty"))
             };
 
             // Update the configuration via the API

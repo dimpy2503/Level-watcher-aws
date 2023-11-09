@@ -37,7 +37,8 @@ class TradingApp:
             "levels": 50,
             "monitoringStatus": False,
             "realTrades": False,
-            "selectedCandle": "1min"
+            "selectedCandle": "1min",
+            "qty": 0
         }
 
     def login(self, totp):
@@ -185,7 +186,6 @@ class TradingApp:
                         self.upperLevel = self.ltp - last_two_digits + 50
                         self.lowerLevel = self.ltp - last_two_digits
 
-
     def CandleCloseEvent(self):
         current_time = datetime.now()
         current_minute = current_time.minute
@@ -301,7 +301,8 @@ class TradingApp:
         entry = {
             'strike': self.activeTradeSymbol['TradingSymbol'],
             'ltp': self.getLtp(self.activeTradeSymbol),
-            'time': current_time_string
+            'time': current_time_string,
+            'qty': self.config_data['qty']
         }
         self.trade_service.create_ledger_entry(entry)
 
