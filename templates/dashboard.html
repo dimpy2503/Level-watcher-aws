@@ -179,13 +179,16 @@
             const rows = table.querySelectorAll('tbody tr');
 
             // Initialize a string to store the CSV data
-            let csvData = 'Name,Age\n';
+            let csvData = 'ID,Strike,LTP,Time\n';
 
             rows.forEach(row => {
                 const cells = row.querySelectorAll('td');
-                const name = cells[0].textContent;
-                const age = cells[1].textContent;
-                csvData += `${name},${age}\n`;
+                const ID = cells[0].textContent;
+                const Strike = cells[1].textContent;
+                const LTP = cells[2].textContent;
+                const Time = cells[3].textContent;
+
+                csvData += `${ID},${Strike},${LTP},${Time}\n`;
             });
 
             // Create a Blob with the CSV data

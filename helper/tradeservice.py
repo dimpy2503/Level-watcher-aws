@@ -40,7 +40,7 @@ class TradeService:
         return self.cursor.fetchone()
 
     def get_all_ledger_entries(self):
-        sql = 'SELECT * FROM ledger_book ORDER BY id'
+        sql = 'SELECT * FROM ledger_book ORDER BY id desc'
         self.cursor.execute(sql, ())
         return self.cursor.fetchall()
 
@@ -71,7 +71,7 @@ class TradeService:
         return self.cursor.fetchone()
 
     def get_all_trades(self):
-        sql = 'SELECT * FROM trades ORDER BY id'
+        sql = 'SELECT * FROM trades ORDER BY id desc'
         self.cursor.execute(sql)
         return self.cursor.fetchall()
 

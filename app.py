@@ -119,7 +119,7 @@ def update_random_number():
             random_number = new_random
             print(random_number)
         requesthandler.trading_app.mockTest(new_random)
-        time.sleep(10)
+        time.sleep(5)
 
 
 # cron examples

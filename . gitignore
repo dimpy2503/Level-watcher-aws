@@ -47,3 +47,5 @@ trades.db
 
 ./config.json
 ./trades.db
+
+trades.db

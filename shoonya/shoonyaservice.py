@@ -18,7 +18,7 @@ class TradingApp:
         self.uid = "FA54939"
         self.vc = "FA54939_U"
         self.app_key = "456bd303324fa7cf27fdcbe164a8a200"
-        self.pwd = "Dimpy@2503"
+        self.pwd = "Dimpy@250383"
         self.imei = "abc1234"
         self.susertoken = ""
         self.activeStrike = ""
@@ -34,10 +34,10 @@ class TradingApp:
         self.socket_opened = False
         self.config_data = {
             "candles": ["1min", "5min", "15min", "30min", "1hour"],
-            "levels": 100,
+            "levels": 50,
             "monitoringStatus": False,
             "realTrades": False,
-            "selectedCandle": "15min"
+            "selectedCandle": "1min"
         }
 
     def login(self, totp):
@@ -125,30 +125,66 @@ class TradingApp:
         print(f"Status is {self.config_data['monitoringStatus']}")
 
     def checkLevelCross(self):
+        if self.config_data['levels'] == 100:
+            print("100 level")
+            if self.upperLevel == 0:
+                self.upperLevel = math.ceil(self.ltp / 100) * 100
+                self.lowerLevel = math.floor(self.ltp / 100) * 100
 
-        if self.upperLevel == 0:
-            self.upperLevel = math.ceil(self.ltp / 100) * 100
-            self.lowerLevel = math.floor(self.ltp / 100) * 100
+            if self.lowerLevel == 0:
+                self.upperLevel = math.ceil(self.ltp / 100) * 100
+                self.lowerLevel = math.floor(self.ltp / 100) * 100
 
-        if self.lowerLevel == 0:
-            self.upperLevel = math.ceil(self.ltp / 100) * 100
-            self.lowerLevel = math.floor(self.ltp / 100) * 100
+            print('levels ', "U:", self.upperLevel, " L:", self.lowerLevel, " C:", self.ltp)
+            print("==========================================================")
 
-        print('levels ', "U:", self.upperLevel, " L:", self.lowerLevel, " C:", self.ltp)
-        print("==========================================================")
+            if self.is_current_time_in_market():
+                if self.ltp > self.upperLevel:
+                    self.tradeAction(self.ltp, True)
+                    self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
+                    self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level
+                    # insert trade
 
-        if self.is_current_time_in_market():
-            if self.ltp > self.upperLevel:
-                self.tradeAction(self.ltp, True)
-                self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
-                self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level
-                # insert trade
+                elif self.ltp < self.lowerLevel:
+                    self.tradeAction(self.ltp, False)
+                    self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
+                    self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level
+                    # insert trade
+        elif self.config_data['levels'] == 50:
+            print("50 level")
 
-            elif self.ltp < self.lowerLevel:
-                self.tradeAction(self.ltp, False)
-                self.upperLevel = math.ceil(self.ltp / 100) * 100  # Set a new upper level
-                self.lowerLevel = math.floor(self.ltp / 100) * 100  # Set a new lower level
-                # insert trade
+            if self.upperLevel == 0 or self.lowerLevel == 0:
+                last_two_digits = self.ltp % 100
+                if last_two_digits > 50:
+                    self.upperLevel = self.ltp - last_two_digits + 100
+                    self.lowerLevel = self.ltp - last_two_digits + 50
+                else:
+                    self.upperLevel = self.ltp - last_two_digits + 50
+                    self.lowerLevel = self.ltp - last_two_digits
+
+            print('levels ', "U:", self.upperLevel, " L:", self.lowerLevel, " C:", self.ltp)
+            print("==========================================================")
+
+            if self.is_current_time_in_market():
+                if self.ltp > self.upperLevel:
+                    self.tradeAction(self.ltp, True)
+                    last_two_digits = self.ltp % 100
+                    if last_two_digits > 50:
+                        self.upperLevel = self.ltp - last_two_digits + 100
+                        self.lowerLevel = self.ltp - last_two_digits + 50
+                    else:
+                        self.upperLevel = self.ltp - last_two_digits + 50
+                        self.lowerLevel = self.ltp - last_two_digits
+                elif self.ltp < self.lowerLevel:
+                    self.tradeAction(self.ltp, False)
+                    last_two_digits = self.ltp % 100
+                    if last_two_digits > 50:
+                        self.upperLevel = self.ltp - last_two_digits + 100
+                        self.lowerLevel = self.ltp - last_two_digits + 50
+                    else:
+                        self.upperLevel = self.ltp - last_two_digits + 50
+                        self.lowerLevel = self.ltp - last_two_digits
+
 
     def CandleCloseEvent(self):
         current_time = datetime.now()
@@ -188,25 +224,27 @@ class TradingApp:
         print('insertTrade', "C:", close, " isUpperLevelCross:", isUpperLevelCross, ' activeTrade:', self.activeTrade)
         print("==========================================================")
 
+        atm = (int(close / 100) * 100) + 100
+
         if isUpperLevelCross:
             if not self.activeTrade:
                 self.insert_trade(close, time_string, True, 'CE')
-                self.placeOrders(self.upperLevel, 'CE', True)
+                self.placeOrders(atm, 'CE', True)
                 self.activeTrade = True
             elif self.activeTrade:
                 self.insert_trade(close, time_string, False, self.activeStrike)
-                self.placeOrders(self.upperLevel, self.activeStrike, False)
+                self.placeOrders(atm, self.activeStrike, False)
                 self.activeTrade = False
                 self.tradeAction(close, isUpperLevelCross)
 
         elif not isUpperLevelCross:
             if not self.activeTrade:
                 self.insert_trade(close, time_string, True, 'PE')
-                self.placeOrders(self.lowerLevel, 'PE', True)
+                self.placeOrders(atm, 'PE', True)
                 self.activeTrade = True
             elif self.activeTrade:
                 self.insert_trade(close, time_string, False, self.activeStrike)
-                self.placeOrders(self.lowerLevel, self.activeStrike, False)
+                self.placeOrders(atm, self.activeStrike, False)
                 self.activeTrade = False
                 self.tradeAction(close, isUpperLevelCross)
 
@@ -257,8 +295,8 @@ class TradingApp:
         else:
             self.sellOrder(self.activeTradeSymbol)
 
-        current_time = datetime.now().time()
-        current_time_string = current_time.strftime('%H:%M:%S')  # 24-hour format
+        current_time = datetime.now()
+        current_time_string = current_time.strftime('%d %b %H:%M:%S')  # 24-hour format
 
         entry = {
             'strike': self.activeTradeSymbol['TradingSymbol'],
