@@ -1,5 +1,4 @@
 from flask import make_response, jsonify
-
 from shoonya.shoonyaservice import TradingApp
 
 http_status_codes = {
@@ -79,8 +78,6 @@ def config():
     else:
         return "index.html"
 
-
-reinitialize_trading_app()
 
 # strike = trading_app.filterBankNiftyOptions('43700', 'CE')
 # print(strike)

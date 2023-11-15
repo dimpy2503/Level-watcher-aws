@@ -9,7 +9,7 @@
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark">
-    <a class="navbar-brand" href="#">Dashboard</a>
+    <a class="navbar-brand" href="#">Dashboard</a> Market: <span id="dynamicValue"></span>
     <ul class="nav">
         <li class="nav-item">
             <a class="nav-link" href="/dashboard">Home</a>
@@ -92,6 +92,7 @@
 
 <!-- Include Bootstrap JS -->
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 
 <script>
         // Function to refresh Trades
@@ -215,6 +216,26 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+
+        // Initialize SocketIO
+        var socket = io.connect('ws://' + document.domain + ':' + location.port);
+
+        // Function to update the dynamic value in the header
+        function updateDynamicValue(value) {
+            document.getElementById("dynamicValue").textContent = value;
+        }
+
+        // Call the update function when a new value is received from the server
+        socket.on('update_value', function (data) {
+            updateDynamicValue(data.marketAt);
+        });
+
+        // Example function to simulate changing the variable and updating the header
+        function simulateValueChange() {
+            var newValue = "New Value";  // Replace this with your actual variable value
+            socket.emit('update_value', {value: newValue});
+        }
+
 
 </script>
 </body>

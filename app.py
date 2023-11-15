@@ -7,6 +7,7 @@ from helper import requesthandler
 from helper.tradeservice import TradeService
 import threading
 from flask_apscheduler import APScheduler
+from flask_socketio import SocketIO
 
 load_dotenv()
 import os
@@ -26,6 +27,7 @@ logging.basicConfig(level=logging.DEBUG)
 app = Flask(__name__)
 app.config.from_object(Config())
 app.secret_key = os.urandom(24)
+socketio = SocketIO(app)
 
 scheduler = APScheduler()
 
@@ -122,6 +124,13 @@ def update_random_number():
         time.sleep(5)
 
 
+def check_market():
+    while True:
+        market_at = requesthandler.trading_app.getMarketAt()
+        handle_update(message=market_at)
+        time.sleep(5)
+
+
 # cron examples
 @scheduler.task('cron', id='do_job_2', minute='*')
 def job2():
@@ -129,24 +138,33 @@ def job2():
     requesthandler.trading_app.CandleCloseEvent()
 
 
+@socketio.on('update_value')
+def handle_update(message):
+    # Broadcast the updated value to all connected clients
+    socketio.emit('update_value', {'marketAt': message})
+
+
+@socketio.on("connect")
+def handle_connect():
+    print("Client connected")
+
+
+requesthandler.reinitialize_trading_app()
 requesthandler.trading_app.downloadMaster()
 
 if __name__ == "__main__":
     # Start a separate thread to update the random number
-    update_thread = threading.Thread(target=update_random_number)
-    update_thread.daemon = True
+    # update_thread = threading.Thread(target=update_random_number)
+    # update_thread.daemon = True
     # update_thread.start()
 
-    # Schedule the event to run at the end of the 5th minute (replace 5 with your desired minute).
-    # scheduler.add_job(shoonyaservice.CandleCloseEvent, 'cron', minute='5', second=0)
-    # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
-    # scheduler.add_job(trading_app.CandleCloseEvent, 'cron', minute='*', second=0)
-    # scheduler.add_job(requesthandler.CandleCloseEvent, 'cron', minute='*')
-    # scheduler.add_job(requesthandler.CandleCloseEvent, CronTrigger.from_crontab('* * * * *'))
-    # scheduler.add_job(requesthandler.trading_app.CandleCloseEvent, 'cron', second='*')
-    # scheduler.start()
+    update_thread = threading.Thread(target=check_market)
+    update_thread.daemon = True
+    update_thread.start()
 
     scheduler.init_app(app)
     scheduler.start()
-    app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False, threaded=True)
+    socketio.run(app, debug=True, host="0.0.0.0", port=port, use_reloader=False)
+
+    # app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False, threaded=True)
     # app.run(host="0.0.0.0", port=port, debug=True)

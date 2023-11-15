@@ -7,7 +7,6 @@ import requests
 from helper import utils
 from helper.tradeservice import TradeService
 from shoonya.api_helper import ShoonyaApiPy
-import time
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -41,6 +40,17 @@ class TradingApp:
             "qty": 0
         }
 
+    def reset_config(self):
+        self.config_data = {
+            "candles": ["1min", "5min", "15min", "30min", "1hour"],
+            "levels": 50,
+            "monitoringStatus": False,
+            "realTrades": False,
+            "selectedCandle": "1min",
+            "qty": 0
+        }
+        self.ltp = 0
+
     def login(self, totp):
         try:
             ret = self.api.login(userid=self.uid, password=self.pwd, twoFA=totp, vendor_code=self.vc,
@@ -71,6 +81,7 @@ class TradingApp:
 
     def logout(self):
         self.closeSocket()
+        self.reset_config()
         self.api.logout()
 
     def closeSocket(self):
@@ -219,34 +230,36 @@ class TradingApp:
             self.freeze = False
 
     def tradeAction(self, close, isUpperLevelCross):
-        current_time = datetime.now()
-        time_string = current_time.strftime("%I:%M %p")
-        print('insertTrade', "C:", close, " isUpperLevelCross:", isUpperLevelCross, ' activeTrade:', self.activeTrade)
-        print("==========================================================")
+        if self.is_current_time_in_buy_market():
+            current_time = datetime.now()
+            time_string = current_time.strftime("%I:%M %p")
+            print('insertTrade', "C:", close, " isUpperLevelCross:", isUpperLevelCross, ' activeTrade:',
+                  self.activeTrade)
+            print("==========================================================")
 
-        atm = (int(close / 100) * 100) + 100
+            atm = (int(close / 100) * 100) + 100
 
-        if isUpperLevelCross:
-            if not self.activeTrade:
-                self.insert_trade(close, time_string, True, 'CE')
-                self.placeOrders(atm, 'CE', True)
-                self.activeTrade = True
-            elif self.activeTrade:
-                self.insert_trade(close, time_string, False, self.activeStrike)
-                self.placeOrders(atm, self.activeStrike, False)
-                self.activeTrade = False
-                self.tradeAction(close, isUpperLevelCross)
+            if isUpperLevelCross:
+                if not self.activeTrade:
+                    self.insert_trade(close, time_string, True, 'CE')
+                    self.placeOrders(atm, 'CE', True)
+                    self.activeTrade = True
+                elif self.activeTrade:
+                    self.insert_trade(close, time_string, False, self.activeStrike)
+                    self.placeOrders(atm, self.activeStrike, False)
+                    self.activeTrade = False
+                    self.tradeAction(close, isUpperLevelCross)
 
-        elif not isUpperLevelCross:
-            if not self.activeTrade:
-                self.insert_trade(close, time_string, True, 'PE')
-                self.placeOrders(atm, 'PE', True)
-                self.activeTrade = True
-            elif self.activeTrade:
-                self.insert_trade(close, time_string, False, self.activeStrike)
-                self.placeOrders(atm, self.activeStrike, False)
-                self.activeTrade = False
-                self.tradeAction(close, isUpperLevelCross)
+            elif not isUpperLevelCross:
+                if not self.activeTrade:
+                    self.insert_trade(close, time_string, True, 'PE')
+                    self.placeOrders(atm, 'PE', True)
+                    self.activeTrade = True
+                elif self.activeTrade:
+                    self.insert_trade(close, time_string, False, self.activeStrike)
+                    self.placeOrders(atm, self.activeStrike, False)
+                    self.activeTrade = False
+                    self.tradeAction(close, isUpperLevelCross)
 
     def insert_trade(self, close, time_string, isBuying, type):
         trade_entry = {
@@ -339,7 +352,7 @@ class TradingApp:
 
     def buyOrder(self, strike):
         tradingsymbol = strike['TradingSymbol']
-        quantity = 50
+        quantity = 15 if self.config_data['qty'] == 0 else self.config_data['qty']
         discloseqty = 0
         price_type = 'MKT'
         price = 0
@@ -347,15 +360,16 @@ class TradingApp:
         retention = 'DAY'
         remarks = 'my_order_001'
         # print(tradingsymbol)
-        # ret = api.place_order(buy_or_sell='B', product_type='C',
-        #                       exchange='NSE', tradingsymbol=tradingsymbol,
-        #                       quantity=quantity, discloseqty=discloseqty, price_type=price_type, price=price,
-        #                       trigger_price=trigger_price,
-        #                       retention=retention, remarks=remarks)
+        if self.config_data['realTrades']:
+            ret = self.api.place_order(buy_or_sell='B', product_type='C',
+                                       exchange='NSE', tradingsymbol=tradingsymbol,
+                                       quantity=quantity, discloseqty=discloseqty, price_type=price_type, price=price,
+                                       trigger_price=trigger_price,
+                                       retention=retention, remarks=remarks)
 
     def sellOrder(self, strike):
         tradingsymbol = strike['TradingSymbol']
-        quantity = 50
+        quantity = 15 if self.config_data['qty'] == 0 else self.config_data['qty']
         discloseqty = 0
         price_type = 'MKT'
         price = 0
@@ -363,11 +377,12 @@ class TradingApp:
         retention = 'DAY'
         remarks = 'my_order_001'
         # print(tradingsymbol)
-        # ret = api.place_order(buy_or_sell='S', product_type='C',
-        #                       exchange='NSE', tradingsymbol=tradingsymbol,
-        #                       quantity=quantity, discloseqty=discloseqty, price_type=price_type, price=price,
-        #                       trigger_price=trigger_price,
-        #                       retention=retention, remarks=remarks)
+        if self.config_data['realTrades']:
+            ret = self.api.place_order(buy_or_sell='S', product_type='C',
+                                       exchange='NSE', tradingsymbol=tradingsymbol,
+                                       quantity=quantity, discloseqty=discloseqty, price_type=price_type, price=price,
+                                       trigger_price=trigger_price,
+                                       retention=retention, remarks=remarks)
 
     def startSocket(self):
         ret = self.api.start_websocket(order_update_callback=self.event_handler_order_update,
@@ -409,8 +424,17 @@ class TradingApp:
         else:
             return 0
 
+    def getMarketAt(self):
+        return self.ltp
+
     def is_current_time_in_market(self):
         current_time = datetime.now().time()
         start_time = datetime.strptime('09:15:00', '%H:%M:%S').time()
         end_time = datetime.strptime('15:25:00', '%H:%M:%S').time()
+        return start_time < current_time < end_time
+
+    def is_current_time_in_buy_market(self):
+        current_time = datetime.now().time()
+        start_time = datetime.strptime('09:15:01', '%H:%M:%S').time()
+        end_time = datetime.strptime('15:14:59', '%H:%M:%S').time()
         return start_time < current_time < end_time

@@ -1,5 +1,5 @@
 {
-    "request_time": "12:28:12 09-11-2023",
+    "request_time": "15:12:29 15-11-2023",
     "actid": "FA54939",
     "access_type": [
         "WEB",
@@ -149,7 +149,7 @@
         }
     ],
     "stat": "Ok",
-    "susertoken": "2f084d9aae9be167c7eb44f197521e31b2b9aa077c2a810a93e922ee23e6d7b0",
+    "susertoken": "5a4a621f252d8dbcd7139f93b11fb1008988e058edeb8b8d7462792427ee9608",
     "email": "dimpy.sharma@hotmail.com",
     "uid": "FA54939",
     "brnchid": "HO",
@@ -178,6 +178,18 @@
     ],
     "mws": {
         "2": [
+            {
+                "exch": "NFO",
+                "token": "41363",
+                "tsym": "BANKNIFTY15NOV23P44300",
+                "weekly": "W3",
+                "dname": "BANKNIFTY 15NOV23 44300 PE ",
+                "instname": "OPTIDX",
+                "pp": "2",
+                "ls": "15",
+                "ti": "0.05",
+                "optt": "PE"
+            },
             {
                 "exch": "NSE",
                 "token": "1333",
@@ -217,5 +229,5 @@
         ]
     },
     "brkname": "FINV",
-    "lastaccesstime": "1699513092"
+    "lastaccesstime": "1700041349"
 }
