@@ -1,7 +1,9 @@
 connect to server
 
 [//]: # (ssh -i ./python_key.pem ubuntu@65.2.30.207)
-ssh -i "python_key.pem" ec2-user@ec2-65-1-133-115.ap-south-1.compute.amazonaws.com
+ssh -i "python_key.pem" ec2-user@ec2-13-232-23-156.ap-south-1.compute.amazonaws.com
+
+https://ec2-13-232-23-156.ap-south-1.compute.amazonaws.com/
 
 update libs
 sudo apt update
@@ -58,6 +60,8 @@ pm2 start app.py --name "flask-app"
 sudo pm2 start app.py --name "flask-app" --output ./logs/out.log --error ./logs/error.log
 
 sudo pm2 start app.py --name "flask-app" --interpreter python3 --output ./logs/out.log --error ./logs/error.log
+
+python3 -m venv venv
 
 source venv/bin/activate
 
