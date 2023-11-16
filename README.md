@@ -61,9 +61,13 @@ sudo pm2 start app.py --name "flask-app" --output ./logs/out.log --error ./logs/
 
 sudo pm2 start app.py --name "flask-app" --interpreter python3 --output ./logs/out.log --error ./logs/error.log
 
+
 python3 -m venv venv
 
 source venv/bin/activate
+pip3 install --upgrade setuptools
+python3 -m pip install --upgrade pip
+pip3 install -r requirements.txt
 
 pm2 logs "flask-app" --lines 100
 

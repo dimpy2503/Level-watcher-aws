@@ -164,7 +164,7 @@ if __name__ == "__main__":
 
     scheduler.init_app(app)
     scheduler.start()
-    socketio.run(app, debug=True, host="0.0.0.0", port=port, use_reloader=False)
+    socketio.run(app, debug=True, host="0.0.0.0", port=port, use_reloader=False, allow_unsafe_werkzeug=True)
 
     # app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False, threaded=True)
     # app.run(host="0.0.0.0", port=port, debug=True)
