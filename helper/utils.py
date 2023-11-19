@@ -57,3 +57,49 @@ def readFile(file_path):
             return None
     else:
         return False
+
+
+def calculate_pivot_points_levels_4(high, low, close):
+    pivot = round((high + low + close) / 3, 2)
+    support1 = round((2 * pivot) - high, 2)
+    support2 = round(pivot - (high - low), 2)
+    support3 = round(support2 - (high - low), 2)
+    support4 = round(support3 - (high - low), 2)
+    resistance1 = round((2 * pivot) - low, 2)
+    resistance2 = round(pivot + (high - low), 2)
+    resistance3 = round(resistance2 + (high - low), 2)
+    resistance4 = round(resistance3 + (high - low), 2)
+
+    pivot_points = {
+        "R4": resistance4,
+        "R3": resistance3,
+        "R2": resistance2,
+        "R1": resistance1,
+        "PP": pivot,
+        "S1": support1,
+        "S2": support2,
+        "S3": support3,
+        "S4": support4,
+    }
+    pivot_points = {
+        'R4': 45200,
+        'R3': 44900,
+        'R2': 44500,
+        'R1': 44300,
+        'PP': 44200,
+        'S1': 44000,
+        'S2': 43800,
+        'S3': 43500,
+        'S4': 43100
+    }
+    return pivot_points
+
+# # Example usage:
+# high = 44408.55
+# low = 44164.55
+# close = 44201.7
+#
+# result = calculate_pivot_points_levels_4(high, low, close)
+#
+# for key, value in result.items():
+#     print(f"{key}: {value}")

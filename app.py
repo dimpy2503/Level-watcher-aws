@@ -108,7 +108,7 @@ def delete_all_trades():
 
 
 # Initialize the random number
-random_number = random.randint(43100, 43500)
+random_number = random.randint(43100, 45200)
 random_number_lock = threading.Lock()
 
 
@@ -116,7 +116,7 @@ random_number_lock = threading.Lock()
 def update_random_number():
     global random_number
     while True:
-        new_random = random.randint(43100, 43900)
+        new_random = random.randint(43100,45200)
         with random_number_lock:
             random_number = new_random
             print(random_number)
@@ -154,9 +154,9 @@ requesthandler.trading_app.downloadMaster()
 
 if __name__ == "__main__":
     # Start a separate thread to update the random number
-    # update_thread = threading.Thread(target=update_random_number)
-    # update_thread.daemon = True
-    # update_thread.start()
+    # simulation_thread = threading.Thread(target=update_random_number)
+    # simulation_thread.daemon = True
+    # simulation_thread.start()
 
     update_thread = threading.Thread(target=check_market)
     update_thread.daemon = True
@@ -164,6 +164,7 @@ if __name__ == "__main__":
 
     scheduler.init_app(app)
     scheduler.start()
+    # socketio.run(app, debug=True, host="0.0.0.0", port=port, use_reloader=False, allow_unsafe_werkzeug=True)
     socketio.run(app, debug=True, host="0.0.0.0", port=port, use_reloader=False, allow_unsafe_werkzeug=True)
 
     # app.run(host="0.0.0.0", port=port, debug=True, use_reloader=False, threaded=True)

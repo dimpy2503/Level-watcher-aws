@@ -7,6 +7,7 @@ import requests
 from helper import utils
 from helper.tradeservice import TradeService
 from shoonya.api_helper import ShoonyaApiPy
+import pandas as pd
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -37,8 +38,24 @@ class TradingApp:
             "monitoringStatus": False,
             "realTrades": False,
             "selectedCandle": "1min",
-            "qty": 0
+            "qty": 0,
+            "strategy": "pivot"
         }
+
+        self.pivots = {
+            "PP": 0,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0,
+            "R4": 0,
+            "S1": 0,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0,
+        }
+        self.pivot_upper_level = 0
+        self.pivot_lower_level = 0
+        self.simulation = False
 
     def reset_config(self):
         self.config_data = {
@@ -50,6 +67,21 @@ class TradingApp:
             "qty": 0
         }
         self.ltp = 0
+        self.pivots = {
+            "PP": 0,
+            "R1": 0,
+            "R2": 0,
+            "R3": 0,
+            "R4": 0,
+            "S1": 0,
+            "S2": 0,
+            "S3": 0,
+            "S4": 0,
+        }
+        self.pivot_upper_level = 0
+        self.pivot_lower_level = 0
+        self.upperLevel = 0
+        self.lowerLevel = 0
 
     def login(self, totp):
         try:
@@ -124,9 +156,14 @@ class TradingApp:
         elif self.config_data['monitoringStatus']:
             self.freeze = True
             self.ltp = close
-            if self.upperLevel == 0 or self.lowerLevel == 0:
-                print('mockTest levels', self.upperLevel, self.lowerLevel, self.freeze)
+            if (self.upperLevel == 0 or self.lowerLevel == 0) and self.config_data['strategy'] == 'level':
+                print('levels', self.upperLevel, self.lowerLevel, self.freeze)
                 self.checkLevelCross();
+                print('levels', self.upperLevel, self.lowerLevel, self.freeze)
+            elif self.config_data['strategy'] == 'pivot' and any(value == 0 for value in self.pivots.values()):
+                print('pivots', self.pivots)
+                self.checkLevelCross();
+                print('pivots', self.pivots)
 
             if self.activeTrade:
                 self.exitTrade(self.ltp)
@@ -134,9 +171,50 @@ class TradingApp:
             self.freeze = False
         else:
             print(f"Status is {self.config_data['monitoringStatus']}")
-        print(f"Status is {self.config_data['monitoringStatus']}")
+        print(f"Status is 2 {self.config_data['monitoringStatus']}")
 
     def checkLevelCross(self):
+        if self.config_data["strategy"] == 'level':
+            self.level_strategy()
+        elif self.config_data["strategy"] == 'pivot':
+            self.pivot_strategy()
+
+    def pivot_strategy(self):
+        if any(value == 0 for value in self.pivots.values()):
+            self.set_pivot()
+        else:
+            print("None of the pivot values are zero.")
+
+        if self.pivot_upper_level == 0 or self.pivot_lower_level == 0:
+            self.pivot_upper_level, self.pivot_lower_level = self.find_pivot_range()
+
+        print('pivot_upper_level', self.pivot_upper_level, self.pivot_lower_level)
+
+        if self.is_current_time_in_market():
+            if self.ltp > self.pivot_upper_level:
+                self.tradeAction(self.ltp, True)
+                self.pivot_upper_level, self.pivot_lower_level = self.find_pivot_range()
+            elif self.ltp < self.pivot_lower_level:
+                self.tradeAction(self.ltp, False)
+                self.pivot_upper_level, self.pivot_lower_level = self.find_pivot_range()
+
+    def find_pivot_range(self):
+        pivot_values = list(self.pivots.values())
+
+        for i in range(len(pivot_values) - 1):
+            upper_limit = pivot_values[i]
+            lower_limit = pivot_values[i + 1]
+
+            if upper_limit > self.ltp > lower_limit:
+                return int(upper_limit), int(lower_limit)
+        return None, None
+
+    def set_pivot(self):
+        market = self.get_bn_lastday();
+        pivots = utils.calculate_pivot_points_levels_4(market['high'], market['low'], market['close'])
+        self.pivots = pivots
+
+    def level_strategy(self):
         if self.config_data['levels'] == 100:
             print("100 level")
             if self.upperLevel == 0:
@@ -274,25 +352,34 @@ class TradingApp:
     def exitTrade(self, close, forceexit=False):
         current_time = datetime.now()
         time_string = current_time.strftime("%I:%M %p")
-        if self.activeStrike == "CE" and (forceexit or close >= self.upperLevel):
+
+        exit_trade = False
+        level = 0
+
+        if self.config_data['strategy'] == 'level':
+            if self.activeStrike == "CE" and (forceexit or close >= self.upperLevel):
+                exit_trade = True
+                level = self.upperLevel
+            elif self.activeStrike == "PE" and (forceexit or close <= self.lowerLevel):
+                exit_trade = True
+                level = self.lowerLevel
+        elif self.config_data['strategy'] == 'pivot':
+            if self.activeStrike == "CE" and (forceexit or close >= self.pivot_upper_level):
+                exit_trade = True
+                level = self.pivot_upper_level
+            elif self.activeStrike == "PE" and (forceexit or close <= self.pivot_lower_level):
+                exit_trade = True
+                level = self.pivot_lower_level
+
+        if exit_trade and level > 0:
             trade_entry = {
                 'marketAt': close,
                 'candleCloseAt': time_string,
                 'isBuying': False,
-                'type': 'CE'
+                'type': self.activeStrike
             }
             self.trade_service.create_trade(trade_entry)
-            self.placeOrders(self.upperLevel, 'CE', False)
-            self.activeTrade = False
-        elif self.activeStrike == "PE" and (forceexit or close <= self.lowerLevel):
-            trade_entry = {
-                'marketAt': close,
-                'candleCloseAt': time_string,
-                'isBuying': False,
-                'type': 'PE'
-            }
-            self.trade_service.create_trade(trade_entry)
-            self.placeOrders(self.lowerLevel, 'PE', False)
+            self.placeOrders(level, self.activeStrike, False)
             self.activeTrade = False
 
     def placeOrders(self, strike, type, isBuy):
@@ -402,9 +489,14 @@ class TradingApp:
                 self.freeze = True
                 self.ltp = int(float(message['lp']))
                 print(self.ltp)
-                if self.upperLevel == 0 or self.lowerLevel == 0:
+                if (self.upperLevel == 0 or self.lowerLevel == 0) and self.config_data['strategy'] == 'level':
                     print('levels', self.upperLevel, self.lowerLevel, self.freeze)
                     self.checkLevelCross();
+                    print('levels', self.upperLevel, self.lowerLevel, self.freeze)
+                elif self.config_data['strategy'] == 'pivot' and any(value == 0 for value in self.pivots.values()):
+                    print('pivots', self.pivots)
+                    self.checkLevelCross();
+                    print('pivots', self.pivots)
 
                 if self.is_current_time_in_market() == False and self.activeTrade:
                     self.exitTrade(self.ltp, True)
@@ -431,10 +523,40 @@ class TradingApp:
         current_time = datetime.now().time()
         start_time = datetime.strptime('09:15:00', '%H:%M:%S').time()
         end_time = datetime.strptime('15:25:00', '%H:%M:%S').time()
-        return start_time < current_time < end_time
+        if self.simulation:
+            return True
+        else:
+            return start_time < current_time < end_time
 
     def is_current_time_in_buy_market(self):
         current_time = datetime.now().time()
         start_time = datetime.strptime('09:15:01', '%H:%M:%S').time()
         end_time = datetime.strptime('15:14:59', '%H:%M:%S').time()
-        return start_time < current_time < end_time
+        if self.simulation:
+            return True
+        else:
+            return start_time < current_time < end_time
+
+    def get_bn_lastday(self):
+        try:
+            # today = datetime.today()
+            # lastBusDay = today - timedelta(days=10)
+            # lastBusDay = lastBusDay.replace(hour=0, minute=0, second=0, microsecond=0)
+            # print(int(lastBusDay.timestamp()))
+            #
+            # ret = self.api.get_time_price_series(exchange='NSE', token='26009', starttime=int(lastBusDay.timestamp()),
+            #                                      interval="1")
+            #
+            # df = pd.DataFrame.from_dict(ret)
+            # print(df)
+            # ret = self.api.get_time_price_series(exchange='NSE', token='26009', interval="DAY")
+
+            return {
+                "open": 44251.70,
+                "high": 44420.95,
+                "low": 44064.15,
+                "close": 44161.55
+            }
+        except Exception as e:
+            print(f"An error occurred: {e}")
+    # Handle the error as needed, for example, logging the error or raising an exception.

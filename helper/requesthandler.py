@@ -29,6 +29,7 @@ def reinitialize_trading_app():
     global trading_app  # Use the global variable
     trading_app = TradingApp()  # Create a new instance of the TradingApp class
     trading_app.setSession()
+    trading_app.get_bn_lastday()
 
 
 def CandleCloseEvent():
@@ -78,6 +79,7 @@ def config():
     else:
         return "index.html"
 
+# reinitialize_trading_app();
 
 # strike = trading_app.filterBankNiftyOptions('43700', 'CE')
 # print(strike)
