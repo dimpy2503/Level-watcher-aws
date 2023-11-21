@@ -318,6 +318,7 @@ class TradingApp:
             atm = (int(close / 100) * 100) + 100
 
             if isUpperLevelCross:
+                atm = atm - 100
                 if not self.activeTrade:
                     self.insert_trade(close, time_string, True, 'CE')
                     self.placeOrders(atm, 'CE', True)
@@ -329,6 +330,7 @@ class TradingApp:
                     self.tradeAction(close, isUpperLevelCross)
 
             elif not isUpperLevelCross:
+                atm = atm + 100
                 if not self.activeTrade:
                     self.insert_trade(close, time_string, True, 'PE')
                     self.placeOrders(atm, 'PE', True)
@@ -539,24 +541,56 @@ class TradingApp:
 
     def get_bn_lastday(self):
         try:
-            # today = datetime.today()
-            # lastBusDay = today - timedelta(days=10)
-            # lastBusDay = lastBusDay.replace(hour=0, minute=0, second=0, microsecond=0)
-            # print(int(lastBusDay.timestamp()))
-            #
-            # ret = self.api.get_time_price_series(exchange='NSE', token='26009', starttime=int(lastBusDay.timestamp()),
-            #                                      interval="1")
-            #
-            # df = pd.DataFrame.from_dict(ret)
-            # print(df)
-            # ret = self.api.get_time_price_series(exchange='NSE', token='26009', interval="DAY")
+            today = datetime.today()
+            lastBusDay = today - timedelta(days=5)
+            lastBusDay = lastBusDay.replace(hour=0, minute=0, second=0, microsecond=0)
+            print('lastBusDay', int(lastBusDay.timestamp()))
+
+            ret = self.api.get_time_price_series(exchange='NSE', token='26009', starttime=int(lastBusDay.timestamp()),
+                                                 interval="240")
+
+            if None != ret:
+                last_date = None
+                open = 0
+                close = 0
+                high = 0
+                low = 0
+                for candle in ret:
+
+                    date_object = datetime.strptime(candle['time'], '%d-%m-%Y %H:%M:%S')
+                    formatted_date = date_object.strftime('%d-%m-%Y')
+
+                    if None == last_date:
+                        last_date = formatted_date
+                        high = candle['inth']
+                        low = candle['intl']
+                        close = candle['intc']
+                    elif last_date != None and last_date != formatted_date:
+                        last_date = candle['time']
+                        open = candle['into']
+                        high = candle['inth']
+                        low = candle['intl']
+                        close = candle['intc']
+                    elif last_date != None and last_date == formatted_date:
+                        last_date = candle['time']
+                        open = candle['into']
+                        high = max(high, candle['inth'])
+                        low = min(low, candle['intl'])
+                        break;
+
+            # open = 0
+
+            if open == 0 or close == 0 or high == 0 or low == 0:
+                raise ValueError("One or more variables is equal to 0.")
+                return None
+            else:
+                print("No variable is equal to 0.")
 
             return {
-                "open": 44251.70,
-                "high": 44420.95,
-                "low": 44064.15,
-                "close": 44161.55
+                "open": float(open),
+                "high": float(high),
+                "low": float(low),
+                "close": float(close)
             }
         except Exception as e:
             print(f"An error occurred: {e}")
-    # Handle the error as needed, for example, logging the error or raising an exception.

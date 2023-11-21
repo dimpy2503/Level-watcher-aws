@@ -1,6 +1,6 @@
 import random
 import time
-from flask import Flask, request, jsonify, session, render_template, url_for, redirect
+from flask import Flask, request, jsonify, session, render_template, url_for, redirect, send_file
 import logging
 from dotenv import load_dotenv
 from helper import requesthandler
@@ -147,6 +147,13 @@ def handle_update(message):
 @socketio.on("connect")
 def handle_connect():
     print("Client connected")
+
+
+# @app.route('/download/config')
+# def download_json():
+#     file_path = 'config.json'
+#     return send_file(file_path, as_attachment=True, download_name='config.json')
+
 
 
 requesthandler.reinitialize_trading_app()
