@@ -4,6 +4,27 @@
     <title>Configuration Page</title>
     <!-- Include Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 50%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+
+
+    </style>
 </head>
 <body>
 <div class="container mt-4">
@@ -35,6 +56,15 @@
                 <option value="level">Level</option>
                 <option value="pivot">Pivot</option>
             </select>
+        </div>
+
+        <div class="form-group">
+            <table id="pivotTable">
+                <tr>
+                    <th>Level</th>
+                    <th>Value</th>
+                </tr>
+            </table>
         </div>
 
         <div class="form-group">
@@ -100,6 +130,8 @@
                 document.getElementById("monitoringStatus").checked = data.monitoringStatus;
                 document.getElementById("realTrades").checked = data.realTrades;
                 document.getElementById("qty").value = data.qty;
+                togglePivotTableVisibility();
+                displayJsonData(data.pivots)
             })
             .catch(error => console.error("Error fetching initial config:", error));
 
@@ -121,6 +153,33 @@
             // Update the configuration via the API
             updateConfiguration(configData);
         });
+
+        // Function to display JSON data in the pivot table
+    function displayJsonData(jsonData) {
+      var table = document.getElementById('pivotTable');
+
+      for (var level in jsonData) {
+        var row = table.insertRow();
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+
+        cell1.innerHTML = level;
+        cell2.innerHTML = jsonData[level];
+      }
+    }
+
+      // Function to show/hide the pivot table based on the selected strategy
+    function togglePivotTableVisibility() {
+        var selectedStrategy = document.getElementById("strategy").value;
+        var pivotTable = document.getElementById("pivotTable");
+
+        if (selectedStrategy === "pivot") {
+            pivotTable.style.display = "block";
+        } else {
+            pivotTable.style.display = "none";
+        }
+    }
+
 
 </script>
 </body>

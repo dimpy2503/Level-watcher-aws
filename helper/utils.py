@@ -81,17 +81,17 @@ def calculate_pivot_points_levels_4(high, low, close):
         "S3": support3,
         "S4": support4,
     }
-    pivot_points = {
-        'R4': 45200,
-        'R3': 44900,
-        'R2': 44500,
-        'R1': 44300,
-        'PP': 44200,
-        'S1': 44000,
-        'S2': 43800,
-        'S3': 43500,
-        'S4': 43100
-    }
+    # pivot_points = {
+    #     'R4': 45200,
+    #     'R3': 44900,
+    #     'R2': 44500,
+    #     'R1': 44300,
+    #     'PP': 44200,
+    #     'S1': 44000,
+    #     'S2': 43800,
+    #     'S3': 43500,
+    #     'S4': 43100
+    # }
     return pivot_points
 
 # # Example usage:

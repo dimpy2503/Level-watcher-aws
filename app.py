@@ -116,7 +116,7 @@ random_number_lock = threading.Lock()
 def update_random_number():
     global random_number
     while True:
-        new_random = random.randint(43100,45200)
+        new_random = random.randint(42997,44421)
         with random_number_lock:
             random_number = new_random
             print(random_number)
